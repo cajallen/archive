@@ -5,7 +5,6 @@
 #include <imgui_internal.h>
 
 #include "extension/icons/font_awesome4.h"
-#include "editor/asset_browser.hpp"
 
 namespace ImGui {
 
@@ -162,14 +161,14 @@ void PathTarget(fs::path* out, const string& dnd_key) {
     }
 }
 
-bool PathSelect(const string& hint, string* out, const string& base_folder, spellbook::FileType file_type, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
+bool PathSelect(const string& hint, string* out, const string& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
     fs::path out_input = fs::path(*out);
     bool changed = PathSelect(hint, &out_input, base_folder, file_type, open_subdirectories, context_callback);
     *out = out_input.string();
     return changed;
 }
 
-bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, spellbook::FileType file_type, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
+bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
     if (!fs::exists(base_folder))
         fs::create_directory(base_folder);
 
@@ -200,7 +199,7 @@ bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, 
         }
     }
     EndGroup();
-    PathTarget(out, dnd_key(file_type));
+    PathTarget(out, dnd_key);
 
     bool open = true;
     
@@ -208,7 +207,7 @@ bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, 
     SetNextWindowPos(ImVec2(300, 200), ImGuiCond_FirstUseEver);
     if (BeginPopupModal("File Select", &open)) {
         bool close_popup = false;
-        changed |= PathSelectBody(out, base_folder, path_filter(file_type), &close_popup, open_subdirectories, context_callback);
+        changed |= PathSelectBody(out, base_folder, path_filter, &close_popup, open_subdirectories, context_callback);
         if (close_popup)
             CloseCurrentPopup();
         EndPopup();

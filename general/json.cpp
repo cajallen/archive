@@ -6,8 +6,6 @@
 #include <filesystem>
 #include <dtoa.h>
 
-#include "game/game_file.hpp"
-
 using std::visit;
 using std::ifstream;
 using std::istringstream;

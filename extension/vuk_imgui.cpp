@@ -7,7 +7,6 @@
 #include <vuk/RenderGraph.hpp>
 
 #include "extension/icons/font_awesome4.h"
-#include "game/game.hpp"
 #include "general/file.hpp"
 
 namespace spellbook {
@@ -35,7 +34,7 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator) {
     ImGuiData data;
     auto      [tex, stub] = create_texture(allocator, vuk::Format::eR8G8B8A8Srgb, (vuk::Extent3D) dimensions, pixels, false);
     data.font_texture     = std::move(tex);
-    stub.wait(allocator, game.renderer.compiler);
+    stub.wait(allocator, compiler);
     ctx.set_name(data.font_texture, "ImGui/font");
     vuk::SamplerCreateInfo sci;
     sci.minFilter    = sci.magFilter = vuk::Filter::eLinear;
@@ -60,8 +59,7 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator) {
     return data;
 }
 
-vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, ImGuiData& data, ImDrawData* draw_data,
-    const plf::colony<vuk::SampledImage>&        sampled_images) {
+vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, ImGuiData& data, ImDrawData* draw_data, const plf::colony<vuk::SampledImage>& sampled_images, vuk::Compiler& compiler) {
     auto                    reset_render_state =
         [](const ImGuiData& data, vuk::CommandBuffer& command_buffer, ImDrawData* draw_data, vuk::Buffer vertex, vuk::Buffer index) {
         command_buffer.bind_image(0, 0, *data.font_texture.view).bind_sampler(0, 0, data.font_sci);
@@ -98,9 +96,9 @@ vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, 
         auto              imindo   = imind->add_offset(idx_dst * sizeof(ImDrawIdx));
 
         vuk::host_data_to_buffer(allocator, vuk::DomainFlagBits{}, imverto, std::span(cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size))
-            .wait(allocator, game.renderer.compiler);
+            .wait(allocator, compiler);
         vuk::host_data_to_buffer(allocator, vuk::DomainFlagBits{}, imindo, std::span(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size))
-            .wait(allocator, game.renderer.compiler);
+            .wait(allocator, compiler);
         vtx_dst += cmd_list->VtxBuffer.Size;
         idx_dst += cmd_list->IdxBuffer.Size;
     }

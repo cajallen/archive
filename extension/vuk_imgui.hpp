@@ -14,7 +14,6 @@ struct ImGuiData {
     std::unique_ptr<vuk::SampledImage> font_si;
 };
 ImGuiData   ImGui_ImplVuk_Init(vuk::Allocator& allocator);
-vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, ImGuiData& data, ImDrawData* draw_data,
-    const plf::colony<vuk::SampledImage>& sampled_images);
+vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, ImGuiData& data, ImDrawData* draw_data, const plf::colony<vuk::SampledImage>& sampled_images, vuk::Compiler& compiler);
 
 }

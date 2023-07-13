@@ -7,12 +7,11 @@
 #include <imgui.h>
 #include <magic_enum.hpp>
 
-#include "general/file.hpp"
-#include "general/matrix.hpp"
 #include "general/string.hpp"
 #include "general/vector.hpp"
-#include "game/game_file.hpp"
-#include "icons/font_awesome4.h"
+#include "general/file.hpp"
+#include "general/math/matrix.hpp"
+#include "extension/icons/font_awesome4.h"
 
 
 namespace fs = std::filesystem;
@@ -37,8 +36,8 @@ void PathSource(const fs::path& in_path, string dnd_key = "");
 void PathTarget(fs::path* out, const string& dnd_key);
 
 // A widget to select paths
-bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, spellbook::FileType file_type, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
-bool PathSelect(const string& hint, string* out, const string& base_folder, spellbook::FileType file_type, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
+bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
+bool PathSelect(const string& hint, string* out, const string& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
 
 bool PathSelectBody(fs::path* out, const fs::path& base_folder, const std::function<bool(const fs::path&)>& filter, bool* p_open = nullptr, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
 
