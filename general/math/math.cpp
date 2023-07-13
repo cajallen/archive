@@ -298,7 +298,7 @@ int32 csb(int32 input) {
 }
 
 v3 intersect_axis_plane(ray3 ray, uint32 axis, float axis_value) {
-    f64 t     = (axis_value - ray.origin[axis]) / ray.dir[axis];
+    double t     = (axis_value - ray.origin[axis]) / ray.dir[axis];
     uint32 axis1 = (axis + 1) % 3;
     uint32 axis2 = (axis + 2) % 3;
     v3 ret = {};
@@ -386,11 +386,11 @@ bool segment_intersection(const v2 p0, const v2 p1, const v2 q0, const v2 q1, v2
     v2 v = p1 - p0;
     v2 u = q1 - q0;
     v2 d = p0 - q0;
-    T      c = math::cross(v, u);
+    float c = math::cross(v, u);
     if (math::is_equal(c, 0.0f, 0.00001f))
         return false;
-    T s = math::cross(v, d) / c;
-    T t = math::cross(u, d) / c;
+    float s = math::cross(v, d) / c;
+    float t = math::cross(u, d) / c;
     if (s < 0 || s > 1 || t < 0 || t > 1)
         return false;
     *result = p0 + t * v;

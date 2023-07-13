@@ -100,13 +100,13 @@ json parse_json(istream& iss) {
 }
 
 bool is_int(const string& s) {
-    return !s.empty() && find_if(s.begin(), s.end(), [](u8 c) {
+    return !s.empty() && find_if(s.begin(), s.end(), [](uint8 c) {
         return !(isdigit(c) || c == '-');
     }) == s.end();
 }
 
 bool is_float(const string& s) {
-    return !s.empty() && find_if(s.begin(), s.end(), [](u8 c) {
+    return !s.empty() && find_if(s.begin(), s.end(), [](uint8 c) {
         return !(isdigit(c) || c == '.' || c == '-' || c == 'e');
     }) == s.end();
 }
@@ -210,10 +210,10 @@ string json_value::dump() const {
     visit(overloaded {[&s](bool a) {
                           s = a ? "true" : "false";
                       },
-              [&s](s64 a) {
+              [&s](int64 a) {
                   s = to_string(a);
               },
-              [&s](f64 a) {
+              [&s](double a) {
                   static char buffer[256];
                   auto        size = dtoa(a, buffer);
                   s                = string(buffer, size);

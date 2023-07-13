@@ -84,7 +84,7 @@ int32 random_int32(int32 low, int32 high);
 
 float random_float();
 float random_float(float high);
-float random_float(float low, float high);
+float random_float(const range& r);
 
 uint64 random_uint64();
 

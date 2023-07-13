@@ -2,7 +2,7 @@
 
 #include "general/math/math.hpp"
 
-namespace spellbook {
+namespace spellbook::math {
 
 enum EaseMode {
     EaseMode_Linear,

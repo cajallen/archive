@@ -2,8 +2,8 @@
 
 #include <imgui.h>
 #include <vuk/Types.hpp>
-#include "math.hpp"
-#include "tracy/Tracy.hpp"
+
+#include "general/math/math.hpp"
 
 namespace spellbook {
 
@@ -369,7 +369,6 @@ Color Color::hsl_oklab(float hue, float sat, float lum) {
 
 using namespace palette;
 void color_window(bool* p_open) {
-    ZoneScoped;
     if (ImGui::Begin("Colors", p_open)) {
         COLOR_VIEW(spellbook_0)
         COLOR_VIEW(spellbook_1)

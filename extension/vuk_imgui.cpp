@@ -11,7 +11,7 @@
 
 namespace spellbook {
 
-ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator) {
+ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler) {
     vuk::Context& ctx      = allocator.get_context();
     auto&         io       = ImGui::GetIO();
     io.BackendRendererName = "imgui_impl_vuk";

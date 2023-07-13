@@ -136,10 +136,8 @@ bool InspectDirectory(const fs::path& path, fs::path* p_selected, const std::fun
 
 void PathSource(const fs::path& in_path, string dnd_key_string) {
     if (dnd_key_string.empty()) {
-        magic_enum::enum_for_each<spellbook::FileType>([&in_path, &dnd_key_string] (auto val) {
-            if (path_filter(val)(in_path))
-                dnd_key_string = dnd_key(val);
-        });
+        return;
+        __debugbreak();
     }
     
     if (BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
@@ -163,7 +161,7 @@ void PathTarget(fs::path* out, const string& dnd_key) {
 
 bool PathSelect(const string& hint, string* out, const string& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
     fs::path out_input = fs::path(*out);
-    bool changed = PathSelect(hint, &out_input, base_folder, file_type, open_subdirectories, context_callback);
+    bool changed = PathSelect(hint, &out_input, base_folder, path_filter, dnd_key, open_subdirectories, context_callback);
     *out = out_input.string();
     return changed;
 }
