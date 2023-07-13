@@ -6,13 +6,13 @@
 
 namespace spellbook::math {
 
-const float PI  = 3.14159265359f;
-const float TAU = 6.28318530718f;
-const float D2R = PI / 180.0f;
-const float R2D = 180.0f / PI;
+constexpr float PI  = 3.14159265359f;
+constexpr float TAU = 6.28318530718f;
+constexpr float D2R = PI / 180.0f;
+constexpr float R2D = 180.0f / PI;
 
-float   r2d(float rad);
-float   d2r(float deg);
+float r2d(float rad);
+float d2r(float deg);
 euler r2d(euler rad);
 euler d2r(euler deg);
 
@@ -62,9 +62,7 @@ float cross(v2 a, v2 b);
 v3  cross(v3 a, v3 b);
 v3  ncross(v3 a, v3 b);
 
-// transforms 0-1 to value in range
 float to_range(float value, range r);
-// transforms valaue in range to 0-1
 float from_range(float value, range r);
 
 bool iterate(v3i& current, const v3i& min, const v3i& max);
@@ -80,13 +78,13 @@ float atan3(float y, float x);
 
 void random_seed(uint32 seed);
 
-int32 random_s32();
-int32 random_s32(int32 high);
-int32 random_s32(int32 low, int32 high);
+int32 random_int32();
+int32 random_int32(int32 high);
+int32 random_int32(int32 low, int32 high);
 
-float random_f32();
-float random_f32(float high);
-float random_f32(float low, float high);
+float random_float();
+float random_float(float high);
+float random_float(float low, float high);
 
 uint64 random_uint64();
 
@@ -94,7 +92,7 @@ v3    euler2vector(euler e);
 euler vector2euler(v3 v);
 
 int32 ffsb(int32 input);
-int32 csb(u8 input);
+int32 csb(uint8 input);
 int32 csb(uint32 input);
 int32 csb(int32 input);
 
@@ -104,8 +102,12 @@ v3 project_to_segment(v3 point, line3 line);
 v3 project_point_onto_plane(v3 point, v3 plane_point, v3 plane_normal);
 v3 intersect_axis_plane(ray3 ray, uint32 axis, float axis_value);
 
-bool ray_intersects_aabb(v3 rstart, v3 rdir, v3 bstart, v3 bend, float* out_dist = nullptr);
-bool ray_intersects_aabb(v2 rstart, v2 rdir, v2 bstart, v2 bend, float* out_dist = nullptr);
+float segment_distance(v2 pos32, line2 line);
+bool segment_intersection(const v2 p0, const v2 p1, const v2 q0, const v2 q1, v2* result);
+float line_intersection(const ray3& a, const ray3& b);
+
+bool ray_aabb_intersection(v3 rstart, v3 rdir, v3 bstart, v3 bend, float* out_dist = nullptr);
+bool ray_aabb_intersection(v2 rstart, v2 rdir, v2 bstart, v2 bend, float* out_dist = nullptr);
 
 template <typename T> bool is_nan(T value) {
     return std::isnan(value);
@@ -263,17 +265,6 @@ template <typename T> T normalize(T t) {
     return t / math::length(t);
 }
 
-template <typename T> T distance_to_segment(v2_<T> pos32, line_<v2_<T>> line) {
-    v2_<T> s2p = pos32 - line.start;
-    v2_<T> s2e = line.end - line.start;
-    s2e        = s2e / math::length(s2e);
-
-    float d = dot(s2p, s2e);
-    if (d < 0 || 1 < d)
-        return -1;
-    return length(cross(s2p, s2e));
-}
-
 // Converts 0to1 values to -1to1
 template <typename T> T to_signed_range(T value, bool invert = false) {
     return ((invert ? (1.0f - value) : value) * 2.0f) - 1.0f;
@@ -284,75 +275,11 @@ template <typename T> T to_unsigned_range(T value, bool invert = false) {
     return ((invert ? -1.0f : 1.0f) * value + 1.0f) / 2.0f;
 }
 
-template <typename T> bool intersect_of_line_segments(const v2_<T> p0, const v2_<T> p1, const v2_<T> q0, const v2_<T> q1, v2_<T>* result) {
-    v2_<T> v = p1 - p0;
-    v2_<T> u = q1 - q0;
-    v2_<T> d = p0 - q0;
-    T      c = math::cross(v, u);
-    if (math::is_equal(c, 0.0f, 0.00001f))
-        return false;
-    T s = math::cross(v, d) / c;
-    T t = math::cross(u, d) / c;
-    if (s < 0 || s > 1 || t < 0 || t > 1)
-        return false;
-    *result = p0 + t * v;
-    return true;
-}
-
 template <typename T> constexpr T mix(T a, T b, float x) {
     return a*(1.f-x)+b*x;
 }
 
-enum EaseMode {
-    EaseMode_Linear,
-    EaseMode_Quad,
-    EaseMode_QuadOut,
-    EaseMode_QuadIn,
-    EaseMode_Cubic,
-    EaseMode_CubicOut,
-    EaseMode_CubicIn,
-    EaseMode_ElasticOut,
-    EaseMode_ElasticIn,
-    EaseMode_Elastic
-};
-constexpr float ease(float x, EaseMode mode) {
-    switch (mode) {
-        case (EaseMode_Linear): {
-            return x;
-        } break;
-        case (EaseMode_Quad): {
-            return x < 0.5f ? 2.0f * math::pow(x, 2.0f) : 1.0f - math::pow(-2.0f * x + 2.0f, 2.0f) / 2.0f;
-        } break;
-        case (EaseMode_QuadOut): {
-            return math::pow(x, 2.0f);
-        } break;
-        case (EaseMode_QuadIn): {
-            return 1.0f - math::pow(1.0f - x, 2.0f);
-        } break;
-        case (EaseMode_Cubic): {
-            return x < 0.5f ? 4.0f * math::pow(x, 3.0f) : 1.0f - math::pow(-2.0f * x + 2.0f, 3.0f) / 2.0f;
-        } break;
-        case (EaseMode_CubicOut): {
-            return math::pow(x, 3.0f);
-        } break;
-        case (EaseMode_CubicIn): {
-            return 1.0f - math::pow(1.0f - x, 3.0f);
-        } break;
-        case (EaseMode_Elastic): {
-            const float c5 = (2.0f * math::PI) / 4.5f;
-            return x == 0.0f ? 0.0f
-                : x == 1.0f ? 1.0f
-                    : x < 0.5f ? -(math::pow(2.0f, 20 * x - 10.0f) * math::sin((20.0f * x - 11.125f) * c5)) / 2.0f
-                        : (math::pow(2.0f, -20.0f * x + 10.0f) * math::sin((20.0f * x - 11.125f) * c5)) / 2.0f + 1.0f;
-        } break;
-        default: {
-            __debugbreak();
-            return x;
-        }
-    }
-}
-
-inline float smoothstep(float edge0, float edge1, float x) {
+constexpr float smoothstep(float edge0, float edge1, float x) {
     x = math::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
     return x * x * (3 - 2 * x);
 }
@@ -361,7 +288,7 @@ inline float mod(float input, float divisor) {
     return std::fmod(input, divisor);
 }
 
-inline int32 mod(int32 input, int32 divisor) {
+constexpr int32 mod(int32 input, int32 divisor) {
     return input % divisor;
 }
 
@@ -379,54 +306,11 @@ inline float fract(float input) {
     return math::mod(input, 1.0f);
 }
 
-inline float lerp_angle(float t, range r) {
-    float diff = r.end - r.start;
-
-    diff = math::mod(diff + math::PI, math::TAU);
-    if (diff < 0.0f)
-        diff += math::TAU;
-    diff -= math::PI;
-
-    return r.start + (diff * t);
-}
-
-inline float angle_difference(float a, float b) {
-    return atan2(sin(b-a), cos(b-a));
-}
-
-inline float wrap_angle (float angle) {
-    return angle - math::TAU * floor( angle / math::TAU);
-};
-
-inline bool contains_angle(range r, float angle) {
-    r.start = wrap_angle(r.start);
-    r.end = wrap_angle(r.end);
-    angle = wrap_angle(angle);
-
-    if (r.start < r.end)
-        return (angle > r.start && angle < r.end);
-    if (r.start > r.end)
-        return (angle > r.start || angle < r.end);
-    return (angle == r.start);
-}
-
-inline float clamp_angle(float angle, range r) {
-    r.start = wrap_angle(r.start);
-    r.end = wrap_angle(r.end - 0.001f);
-    angle = wrap_angle(angle);
-
-    // Clamp the angle to the range of the two given angles
-    if (r.start < r.end)
-        return math::max(r.start, math::min(r.end, angle));
-    if (r.start > r.end) {
-        if (angle > r.start || angle < r.end)
-            return angle;
-        if (math::abs(r.end - angle) < math::abs(r.start - angle))
-            return r.end;
-        return r.start;
-    }
-    return r.start;
-}
+float lerp_angle(float t, range r);
+float angle_difference(float a, float b);
+float wrap_angle (float angle);
+bool contains_angle(range r, float angle);
+float clamp_angle(float angle, range r);
 
 inline float clamp(float input, range range) {
     return math::clamp(input, range.start, range.end);
@@ -443,20 +327,6 @@ constexpr float lerp(float x, range r) {
 }
 constexpr v3 lerp(float x, range3 r) {
     return r.start*(1.0f-x)+r.end*x;
-}
-
-#define d_(a,b,c,d) (a.x-b.x)*(c.x-d.x)+(a.y-b.y)*(c.y-d.y)+(a.z-b.z)*(c.z-d.z);
-inline float line_intersection_3d(const ray3& a, const ray3& b) {
-    auto o1 = a.origin;
-    auto e1 = a.origin + a.dir;
-    auto o2 = b.origin;
-    auto e2 = b.origin + b.dir;
-    float d1321 = d_(o1, o2, e1, o1);
-    float d2121 = d_(e1, o1, e1, o1);
-    float d4321 = d_(e2, o2, e1, o1);
-    float d1343 = d_(o1, o2, e2, o2);
-    float d4343 = d_(e2, o2, e2, o2);
-    return (d1343*d4321-d1321*d4343)/(d2121*d4343-d4321*d4321);
 }
 
 v3 rotate(v3 v, uint8 cardinal_rotation);

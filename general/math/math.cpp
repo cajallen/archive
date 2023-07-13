@@ -319,7 +319,7 @@ euler vector2euler(v3 v) {
     return euler{yaw, pitch};
 }
 
-bool ray_intersects_aabb(v3 rstart, v3 rdir, v3 bstart, v3 bend, float* out_dist) {
+bool ray_aabb_intersection(v3 rstart, v3 rdir, v3 bstart, v3 bend, float* out_dist) {
     float tx1 = (bstart.x - rstart.x) / rdir.x;
     float tx2 = (bend.x - rstart.x) / rdir.x;
 
@@ -346,7 +346,7 @@ bool ray_intersects_aabb(v3 rstart, v3 rdir, v3 bstart, v3 bend, float* out_dist
 // https://www.desmos.com/calculator/rryes1oucs
 // Not fully sure why the graph isn't completely accurate, but the algorithm seems to work
 // so there is probably a small error in the graph. - Cole
-bool ray_intersects_aabb(v2 rstart, v2 rdir, v2 bstart, v2 bend, float* out_dist) {
+bool ray_aabb_intersection(v2 rstart, v2 rdir, v2 bstart, v2 bend, float* out_dist) {
     float tx1 = (bstart.x - rstart.x) / rdir.x;
     float tx2 = (bend.x - rstart.x) / rdir.x;
 
@@ -364,7 +364,103 @@ bool ray_intersects_aabb(v2 rstart, v2 rdir, v2 bstart, v2 bend, float* out_dist
     return tmax >= math::max(0.0f, tmin) && tmin < FLT_MAX;
 }
 
-v3 rotate(v3 v, uint32 cardinal_rotation) {
+template <> bool is_nan(v2 value) {
+    return std::isnan(value.x) || std::isnan(value.y);
+}
+template <> bool is_nan(v3 value) {
+    return std::isnan(value.x) || std::isnan(value.y) || std::isnan(value.z);
+}
+
+float segment_distance(v2 pos32, line2 line) {
+    v2 s2p = pos32 - line.start;
+    v2 s2e = line.end - line.start;
+    s2e        = s2e / math::length(s2e);
+
+    float d = dot(s2p, s2e);
+    if (d < 0 || 1 < d)
+        return -1;
+    return length(cross(s2p, s2e));
+}
+
+bool segment_intersection(const v2 p0, const v2 p1, const v2 q0, const v2 q1, v2* result) {
+    v2 v = p1 - p0;
+    v2 u = q1 - q0;
+    v2 d = p0 - q0;
+    T      c = math::cross(v, u);
+    if (math::is_equal(c, 0.0f, 0.00001f))
+        return false;
+    T s = math::cross(v, d) / c;
+    T t = math::cross(u, d) / c;
+    if (s < 0 || s > 1 || t < 0 || t > 1)
+        return false;
+    *result = p0 + t * v;
+    return true;
+}
+
+#define d_(a,b,c,d) (a.x-b.x)*(c.x-d.x)+(a.y-b.y)*(c.y-d.y)+(a.z-b.z)*(c.z-d.z);
+float line_intersection(const ray3& a, const ray3& b) {
+    auto o1 = a.origin;
+    auto e1 = a.origin + a.dir;
+    auto o2 = b.origin;
+    auto e2 = b.origin + b.dir;
+    float d1321 = d_(o1, o2, e1, o1);
+    float d2121 = d_(e1, o1, e1, o1);
+    float d4321 = d_(e2, o2, e1, o1);
+    float d1343 = d_(o1, o2, e2, o2);
+    float d4343 = d_(e2, o2, e2, o2);
+    return (d1343*d4321-d1321*d4343)/(d2121*d4343-d4321*d4321);
+}
+
+float lerp_angle(float t, range r) {
+    float diff = r.end - r.start;
+
+    diff = math::mod(diff + math::PI, math::TAU);
+    if (diff < 0.0f)
+        diff += math::TAU;
+    diff -= math::PI;
+
+    return r.start + (diff * t);
+}
+
+float angle_difference(float a, float b) {
+    return atan2(sin(b-a), cos(b-a));
+}
+
+float wrap_angle (float angle) {
+    return angle - math::TAU * floor( angle / math::TAU);
+};
+
+bool contains_angle(range r, float angle) {
+    r.start = wrap_angle(r.start);
+    r.end = wrap_angle(r.end);
+    angle = wrap_angle(angle);
+
+    if (r.start < r.end)
+        return (angle > r.start && angle < r.end);
+    if (r.start > r.end)
+        return (angle > r.start || angle < r.end);
+    return (angle == r.start);
+}
+
+float clamp_angle(float angle, range r) {
+    r.start = wrap_angle(r.start);
+    r.end = wrap_angle(r.end - 0.001f);
+    angle = wrap_angle(angle);
+
+    // Clamp the angle to the range of the two given angles
+    if (r.start < r.end)
+        return math::max(r.start, math::min(r.end, angle));
+    if (r.start > r.end) {
+        if (angle > r.start || angle < r.end)
+            return angle;
+        if (math::abs(r.end - angle) < math::abs(r.start - angle))
+            return r.end;
+        return r.start;
+    }
+    return r.start;
+}
+
+v3 rotate(v3 v, uint8 cardinal_rotation) {
     if (cardinal_rotation % 4 == 0)
         return v;
     if (cardinal_rotation % 4 == 1)
@@ -374,13 +470,6 @@ v3 rotate(v3 v, uint32 cardinal_rotation) {
     if (cardinal_rotation % 4 == 3)
         return v3{v.y, -v.x, v.z};
     return v;
-}
-
-template <> bool is_nan(v2 value) {
-    return std::isnan(value.x) || std::isnan(value.y);
-}
-template <> bool is_nan(v3 value) {
-    return std::isnan(value.x) || std::isnan(value.y) || std::isnan(value.z);
 }
 
 } // namespace math
