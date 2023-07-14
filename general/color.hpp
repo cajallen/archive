@@ -133,9 +133,20 @@ const Color spellbook_5 = Color::hsv(285.f + 15.f, 0.5f, 0.5f);
 const Color spellbook_6 = Color::hsv(280.f + 15.f, 0.6f, 0.4f);
 const Color spellbook_7 = Color::hsv(275.f + 15.f, 0.7f, 0.3f);
 const Color spellbook_8 = Color::hsv(270.f + 15.f, 0.8f, 0.2f);
-
-
 const Color spellbook_gray = mix(Color(palette::spellbook_3), Color(palette::gray_5), 0.50f);
+
+const Color academy_0 = Color::hsv(200.0f - 20.0f, 0.10f, 1.0f);
+const Color academy_1 = Color::hsv(205.0f - 20.0f, 0.15f, 0.9f);
+const Color academy_2 = Color::hsv(210.0f - 20.0f, 0.20f, 0.8f);
+const Color academy_3 = Color::hsv(215.0f - 20.0f, 0.30f, 0.7f);
+const Color academy_4 = Color::hsv(220.0f - 20.0f, 0.40f, 0.6f);
+const Color academy_5 = Color::hsv(225.0f - 20.0f, 0.50f, 0.5f);
+const Color academy_6 = Color::hsv(230.0f - 20.0f, 0.60f, 0.4f);
+const Color academy_7 = Color::hsv(235.0f - 20.0f, 0.70f, 0.3f);
+const Color academy_8 = Color::hsv(240.0f - 20.0f, 0.80f, 0.2f);
+const Color academy_gray = mix(Color(palette::academy_3), Color(palette::gray_5), 0.50f);
+
+
 
 // https://htmlcolorcodes.com/color-names/
 constexpr Color indian_red(205.f/255.f, 92.f/255.f, 92.f/255.f);

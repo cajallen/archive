@@ -135,7 +135,7 @@ vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, 
                    const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
                    if (pcmd->UserCallback != nullptr) {
                        // User callback, registered via ImDrawList::AddCallback()
-                       // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset
+                       // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the get_renderer().to reset
                        // render state.)
                        if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
                            reset_render_state(data, command_buffer, draw_data, verts, inds);

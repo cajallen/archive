@@ -62,6 +62,7 @@ bool EnumCombo(const string& label, T* value, ImGuiComboFlags flags = 0) {
 }
 
 void StyleColorsSpellbook(ImGuiStyle* dst = nullptr);
+void StyleColorsAcademy(ImGuiStyle* dst = nullptr);
 
 bool DragEuler2(const char* label, spellbook::euler* e, bool input_is_radians = true, float v_speed = 0.5f, ImGuiSliderFlags flags = ImGuiSliderFlags_NoRoundToFormat);
 bool DragEuler3(const char* label, spellbook::euler* e, bool input_is_radians = true, float v_speed = 0.5f, ImGuiSliderFlags flags = ImGuiSliderFlags_NoRoundToFormat);
