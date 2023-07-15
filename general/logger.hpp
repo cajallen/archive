@@ -42,12 +42,12 @@ inline void log(BasicMessage&& msg) { message_queue.push(msg); }
 
 #define assert_else(cond)              \
 if (!(cond)) {                         \
-    log_error("ASSERT_FAIL: !(" #cond ")"); \
+    spellbook::log_error("ASSERT_FAIL: !(" #cond ")"); \
 } if (!(cond))
 
 #define check_else(cond)                  \
 if (!(cond)) {                            \
-    log_warning("CHECK_FAIL: !(" #cond ")"); \
+    spellbook::log_warning("CHECK_FAIL: !(" #cond ")"); \
 } if (!(cond))
 
 

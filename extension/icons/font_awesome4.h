@@ -3,8 +3,6 @@
 // for use with https://github.com/FortAwesome/Font-Awesome/blob/4.x/fonts/fontawesome-webfont.ttf
 #pragma once
 
-#define FONT_ICON_FILE_NAME_FA "external_resources/fonts/fontawesome-webfont.ttf"
-
 #define ICON_MIN_FA 0xf000
 #define ICON_MAX_16_FA 0xf2e0
 #define ICON_MAX_FA 0xf2e0

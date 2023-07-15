@@ -167,14 +167,9 @@ void vector<T>::remove_if(Predicate predicate, bool unordered) {
 
 template <typename T>
 T* vector<T>::remove(T* it, bool unordered) {
-    if (unordered) {
-        if (it + 1 < end())
-            std::swap(*it, this->back());
-        this->remove_back();
-        return it;
-    } else {
-        return internal.erase(this->begin() + (it - this->begin()));
-    }
+    uint32 index = it - this->begin();
+    remove_index(index, unordered);
+    return this->data() + index;
 }
 
 template <typename T>

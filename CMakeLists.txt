@@ -21,4 +21,3 @@ add_library(archive
 target_include_directories(archive PUBLIC .)
 target_link_libraries(archive PUBLIC academy_libs)
 target_precompile_headers(archive PUBLIC general/global.hpp)
-target_compile_definitions(archive PUBLIC IMGUI_USER_CONFIG=\"imgui_config.h\")

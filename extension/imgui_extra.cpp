@@ -125,7 +125,11 @@ bool InspectDirectory(const fs::path& path, fs::path* p_selected, const std::fun
             if (hidden)
                 continue;
 
-            if (dir_entry.is_regular_file() && filter(dir_entry.path()))
+            if (filter) {
+                if (dir_entry.is_regular_file() && filter(dir_entry.path()))
+                    changed |= InspectFile(dir_str, p_selected, context_callback);
+            }
+            else if (dir_entry.is_regular_file())
                 changed |= InspectFile(dir_str, p_selected, context_callback);
         }
         TreePop();
