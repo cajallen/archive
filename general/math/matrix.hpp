@@ -13,7 +13,7 @@ using std::move;
 namespace spellbook {
 
 struct m44 {
-    array<float, 16> data;
+    float data[16] = {};
 
     m44() = default;
 
@@ -74,23 +74,23 @@ struct m44 {
         return out;
     }
     constexpr float* ptr() {
-        return data.data();
+        return data;
     }
 };
 
 inline m44 from_jv_impl(const json_value& jv, m44* _) {
     auto vec = from_jv<vector<float>>(jv);
     m44 m;
-    std::copy_n(vec.begin(), 16, m.data.begin());
+    std::copy_n(vec.begin(), 16, m.data);
     return m;
 }
 inline json_value to_jv(const m44& m) {
-    vector<float> vec(m.data.data(), m.data.data() + m.data.size());
+    vector<float> vec(m.data, m.data + 16);
     return to_jv(vec);
 }
 
 struct m33 {
-    array<float, 9> data = {};
+    float data[9] = {};
 
     m33() = default;
 
@@ -106,16 +106,17 @@ struct m33 {
     constexpr m33(float _00, float _01, float _02, float _10, float _11, float _12, float _20, float _21, float _22)
         : data {_00, _01, _02, _10, _11, _12, _20, _21, _22} {}
 
-    constexpr m33(const m44& other)
-        : data {other.rc(0, 0),
-              other.rc(0, 1),
-              other.rc(0, 2),
-              other.rc(1, 0),
-              other.rc(1, 1),
-              other.rc(1, 2),
-              other.rc(2, 0),
-              other.rc(2, 1),
-              other.rc(2, 2)} {}
+    constexpr m33(const m44& other) : data{
+            other.rc(0, 0),
+            other.rc(0, 1),
+            other.rc(0, 2),
+            other.rc(1, 0),
+            other.rc(1, 1),
+            other.rc(1, 2),
+            other.rc(2, 0),
+            other.rc(2, 1),
+            other.rc(2, 2)
+        } {}
 
     constexpr static m33 identity() {
         m33 mat = {};
@@ -167,9 +168,9 @@ struct m33 {
 };
 
 struct m44GPU {
-    array<float, 16> data = {};
-    explicit constexpr m44GPU(const m44& m) {
-        data = {m.data[0],
+    float data[16] = {};
+    explicit constexpr m44GPU(const m44& m) : data{
+            m.data[0],
             m.data[4],
             m.data[8],
             m.data[12],
@@ -184,14 +185,13 @@ struct m44GPU {
             m.data[3],
             m.data[7],
             m.data[11],
-            m.data[15]};
-    } 
-    constexpr m44GPU() {
-        data = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    }
+            m.data[15]
+        } {}
+    constexpr m44GPU() : data{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1} {}
 
     explicit constexpr operator m44() const {
-        return m44{data[0],
+        return m44{
+            data[0],
             data[4],
             data[8],
             data[12],
@@ -206,14 +206,15 @@ struct m44GPU {
             data[3],
             data[7],
             data[11],
-            data[15]};
+            data[15]
+        };
     }
 };
 
 struct m34 {
-    array<float, 12> data;
-    explicit constexpr m34(const m44& m) {
-        data = {m.data[0],
+    float data[12];
+    explicit constexpr m34(const m44& m) : data{
+            m.data[0],
             m.data[1],
             m.data[2],
             m.data[3],
@@ -224,14 +225,14 @@ struct m34 {
             m.data[8],
             m.data[9],
             m.data[10],
-            m.data[11]};
-    }
+            m.data[11]
+        } {}
 };
 
 struct m34GPU {
-    array<float, 12> data;
-    explicit constexpr m34GPU(const m34& m) {
-        data = {m.data[0],
+    float data[12];
+    explicit constexpr m34GPU(const m34& m) : data{
+            m.data[0],
             m.data[4],
             m.data[8],
             m.data[1],
@@ -242,8 +243,8 @@ struct m34GPU {
             m.data[10],
             m.data[3],
             m.data[7],
-            m.data[11]};
-    }
+            m.data[11]
+        } {}
 };
 
 }

@@ -11,7 +11,7 @@
 
 namespace spellbook {
 
-ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler) {
+ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler, const string& imgui_vert_path, const string& imgui_frag_path) {
     vuk::Context& ctx      = allocator.get_context();
     auto&         io       = ImGui::GetIO();
     io.BackendRendererName = "imgui_impl_vuk";
@@ -48,12 +48,10 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler)
     {
         vuk::PipelineBaseCreateInfo pci;
 
-        auto vpath = "shaders/imgui.vert.spv";
-        auto vcont = get_contents_uint32(vpath);
-        pci.add_spirv(std::vector(vcont.begin(), vcont.end()), vpath);
-        auto fpath = "shaders/imgui.frag.spv";
-        auto fcont = get_contents_uint32(fpath);
-        pci.add_spirv(std::vector(fcont.begin(), fcont.end()), fpath);
+        vector<uint32> vcont = get_contents_uint32(imgui_vert_path);
+        pci.add_spirv(std::vector(vcont.begin(), vcont.end()), imgui_vert_path);
+        vector<uint32> fcont = get_contents_uint32(imgui_frag_path);
+        pci.add_spirv(std::vector(fcont.begin(), fcont.end()), imgui_frag_path);
         ctx.create_named_pipeline("imgui", pci);
     }
     return data;

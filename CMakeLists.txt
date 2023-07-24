@@ -19,5 +19,5 @@ add_library(archive
 )
 
 target_include_directories(archive PUBLIC .)
-target_link_libraries(archive PUBLIC academy_libs)
+target_link_libraries(archive PUBLIC libs)
 target_precompile_headers(archive PUBLIC general/global.hpp)
