@@ -15,7 +15,14 @@ struct ImGuiData {
     vuk::SamplerCreateInfo             font_sci;
     std::unique_ptr<vuk::SampledImage> font_si;
 };
-ImGuiData   ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler, const string& imgui_vert_path, const string& imgui_frag_path);
+
+struct ImGuiShaderInfo {
+    string vert_path;
+    vector<uint32> vert_contents;
+    string frag_path;
+    vector<uint32> frag_contents;
+};
+ImGuiData   ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler, const ImGuiShaderInfo& shader_info);
 vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, ImGuiData& data, ImDrawData* draw_data, const plf::colony<vuk::SampledImage>& sampled_images, vuk::Compiler& compiler);
 
 }

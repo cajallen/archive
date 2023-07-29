@@ -12,10 +12,14 @@ add_library(archive
     general/astar.cpp
     general/bitmask_3d.cpp
     general/color.cpp
-    general/file.cpp
     general/json.cpp
     general/logger.cpp
-    general/path.cpp
+    general/navigation_path.cpp
+    general/file_path.cpp
+)
+
+target_compile_definitions(archive PUBLIC
+    RESOURCE_PARENT_DIR=\"${RESOURCE_PARENT_DIR}\"
 )
 
 target_include_directories(archive PUBLIC .)

@@ -39,6 +39,14 @@ inline void log_error(const std::string& msg, const std::string& group) {
 inline void log(const BasicMessage& msg) { message_queue.push(msg); }
 inline void log(BasicMessage&& msg) { message_queue.push(msg); }
 
+#ifdef DEBUG
+#define sb_assert(cond)                                   \
+if (!(cond)) {                                         \
+    spellbook::log_error("ASSERT_FAIL: !(" #cond ")"); \
+}
+#else
+#define sb_assert(cond)
+#endif
 
 #define assert_else(cond)              \
 if (!(cond)) {                         \

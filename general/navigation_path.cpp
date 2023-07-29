@@ -1,4 +1,4 @@
-﻿#include "path.hpp"
+﻿#include "navigation_path.hpp"
 
 #include "general/math/math.hpp"
 

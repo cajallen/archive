@@ -5,7 +5,7 @@
 
 #include "general/vector.hpp"
 #include "general/bitmask_3d.hpp"
-#include "general/path.hpp"
+#include "general/navigation_path.hpp"
 #include "general/math/geometry.hpp"
 #include "general/math/math.hpp"
 

@@ -7,11 +7,10 @@
 #include <vuk/RenderGraph.hpp>
 
 #include "extension/icons/font_awesome4.h"
-#include "general/file.hpp"
 
 namespace spellbook {
 
-ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler, const string& imgui_vert_path, const string& imgui_frag_path) {
+ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler, const ImGuiShaderInfo& shader_info) {
     vuk::Context& ctx      = allocator.get_context();
     auto&         io       = ImGui::GetIO();
     io.BackendRendererName = "imgui_impl_vuk";
@@ -19,7 +18,7 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler,
 
     io.Fonts->AddFontDefault();
 
-    if (file_exists(FONT_ICON_FILE_NAME_FA)) {
+    if (fs::exists(fs::path(FONT_ICON_FILE_NAME_FA))) {
         static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_16_FA, 0};
         ImFontConfig         icons_config;
         icons_config.MergeMode  = true;
@@ -48,10 +47,8 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler,
     {
         vuk::PipelineBaseCreateInfo pci;
 
-        vector<uint32> vcont = get_contents_uint32(imgui_vert_path);
-        pci.add_spirv(std::vector(vcont.begin(), vcont.end()), imgui_vert_path);
-        vector<uint32> fcont = get_contents_uint32(imgui_frag_path);
-        pci.add_spirv(std::vector(fcont.begin(), fcont.end()), imgui_frag_path);
+        pci.add_spirv(std::vector(shader_info.vert_contents.begin(), shader_info.vert_contents.end()), shader_info.vert_path);
+        pci.add_spirv(std::vector(shader_info.frag_contents.begin(), shader_info.frag_contents.end()), shader_info.frag_path);
         ctx.create_named_pipeline("imgui", pci);
     }
     return data;
