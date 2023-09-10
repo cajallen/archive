@@ -27,6 +27,7 @@ struct FilePath {
     const char* rel_c_str() const;
 
     bool is_file() const;
+    string filename() const;
     string extension() const;
     string stem() const;
 

@@ -42,6 +42,7 @@ bool inspect_dependencies(vector<FilePath>& dependencies, const FilePath& curren
 }
 
 FilePath get_resource_folder() { return FilePath("resources/"); }
+FilePath get_external_resource_folder() { return FilePath("external/"); }
 FilePath resource_path(string_view val) { return get_resource_folder() + string(val); }
 FilePath operator""_rp(const char* str, uint64 length) { return resource_path(string_view{str, length}); }
 

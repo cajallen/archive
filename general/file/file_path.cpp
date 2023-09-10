@@ -47,6 +47,10 @@ bool FilePath::is_file() const {
         return !value.empty();
     return value.find_first_of('.') != string::npos;
 }
+
+string FilePath::filename() const {
+    return rel_path().filename().string();
+}
 string FilePath::extension() const {
     return rel_path().extension().string();
 }

@@ -34,7 +34,7 @@ inline void log_warning(const std::string& msg, const std::string& group) {
 inline void log_error(const std::string& msg, const std::string& group) {
     message_queue.emplace("ERROR: "s + msg, group, palette::crimson);
     __debugbreak();
-}
+    }
 
 inline void log(const BasicMessage& msg) { message_queue.push(msg); }
 inline void log(BasicMessage&& msg) { message_queue.push(msg); }

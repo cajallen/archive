@@ -73,11 +73,11 @@ bool DragMat4(const string& name, spellbook::m44GPU* matrix_gpu, float speed, co
 }
 
 
-bool InspectFile(const fs::path& path, fs::path* p_selected, const std::function<void(const fs::path&)>& context_callback) {
+bool InspectFile(const FilePath& path, FilePath* p_selected, const std::function<void(const FilePath&)>& context_callback) {
     bool changed = false;
-    bool selected = p_selected ? *p_selected == path.string() : false;
-    if (Selectable(path.filename().string().c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups, ImVec2(GetContentRegionAvail().x, GetFrameHeight()))) {
-        *p_selected = path.string();
+    bool selected = p_selected ? *p_selected == path : false;
+    if (Selectable(path.filename().c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups, ImVec2(GetContentRegionAvail().x, GetFrameHeight()))) {
+        *p_selected = path;
         changed = true;
     }
 
@@ -90,47 +90,48 @@ bool InspectFile(const fs::path& path, fs::path* p_selected, const std::function
     return changed;
 } 
 
-bool InspectDirectory(const fs::path& path, fs::path* p_selected, const std::function<bool(const fs::path&)>& filter, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
+bool InspectDirectory(const FilePath& path, FilePath* p_selected, const std::function<bool(const FilePath&)>& filter, int open_subdirectories, const std::function<void(const FilePath&)>& context_callback) {
     bool changed = false;
-    string folder_name = path.string();
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-    if (p_selected && folder_name == *p_selected)
+    if (p_selected && path == *p_selected)
         node_flags |= ImGuiTreeNodeFlags_Selected;
 
     SetNextItemOpen(open_subdirectories > 0, ImGuiCond_Once);
 
-    string dir_string = path.has_stem() ? path.stem().string() : folder_name;
-    
+    fs::path fs_path = path.abs_path();
+    string dir_string = fs_path.has_stem() ? fs_path.stem().string() : path.rel_string();
+    if (dir_string.empty())
+        dir_string = fs_path.parent_path().stem().string();
     bool node_open = TreeNodeEx(dir_string.c_str(), node_flags);
     if (IsItemClicked() && !IsItemToggledOpen() && p_selected) {
-        *p_selected = folder_name;
+        *p_selected = path;
         changed = true;
     }
     
-    PathSource(folder_name);
+    PathSource(path);
 
     if (node_open) {
-        for (auto& dir_entry : fs::directory_iterator(path)) {
+        for (auto& dir_entry : fs::directory_iterator(path.abs_path())) {
             string dir_string = dir_entry.path().string();
             bool   hidden     = dir_entry.path().stem().string().starts_with('.');
             if (hidden && dir_string != ".")
                 continue;
 
             if (dir_entry.is_directory())
-                changed |= InspectDirectory(dir_entry.path(), p_selected, filter, open_subdirectories - 1, context_callback);
+                changed |= InspectDirectory(FilePath(dir_entry), p_selected, filter, open_subdirectories - 1, context_callback);
         }
-        for (auto& dir_entry : fs::directory_iterator(path)) {
-            string dir_str = dir_entry.path().string();
+        for (auto& dir_entry : fs::directory_iterator(path.abs_path())) {
+            FilePath entry_path = FilePath(dir_entry.path());
             bool hidden = dir_entry.path().stem().string().starts_with('.');
             if (hidden)
                 continue;
 
             if (filter) {
-                if (dir_entry.is_regular_file() && filter(dir_entry.path()))
-                    changed |= InspectFile(dir_str, p_selected, context_callback);
+                if (dir_entry.is_regular_file() && filter(entry_path))
+                    changed |= InspectFile(entry_path, p_selected, context_callback);
             }
             else if (dir_entry.is_regular_file())
-                changed |= InspectFile(dir_str, p_selected, context_callback);
+                changed |= InspectFile(entry_path, p_selected, context_callback);
         }
         TreePop();
     }
@@ -138,46 +139,40 @@ bool InspectDirectory(const fs::path& path, fs::path* p_selected, const std::fun
 }
 
 
-void PathSource(const fs::path& in_path, string dnd_key_string) {
-    if (dnd_key_string.empty()) {
+void PathSource(const FilePath& in_path, const char* dnd_key) {
+    if (strlen(dnd_key) == 0) {
         return;
         __debugbreak();
     }
     
     if (BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-        SetDragDropPayload(dnd_key_string.c_str(), in_path.string().c_str(), in_path.string().size());
-        Text("%s", in_path.string().c_str());
+        string full_string = in_path.abs_string();
+        SetDragDropPayload(dnd_key, full_string.c_str(), full_string.size());
+        Text("%s", in_path.rel_c_str());
         EndDragDropSource();
     }
 }
 
-void PathTarget(fs::path* out, const string& dnd_key) {
+void PathTarget(FilePath* out, const char* dnd_key) {
     if (BeginDragDropTarget()) {
-        if (const ImGuiPayload* payload = AcceptDragDropPayload(dnd_key.c_str())) {
+        if (const ImGuiPayload* payload = AcceptDragDropPayload(dnd_key)) {
             string out_string;
             out_string.resize(payload->DataSize);
             strncpy(out_string.data(), (char*) payload->Data, payload->DataSize);
-            *out = fs::path(out_string);
+            *out = FilePath(out_string);
         }
         EndDragDropTarget();
     }
 }
 
-bool PathSelect(const string& hint, string* out, const string& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
-    fs::path out_input = fs::path(*out);
-    bool changed = PathSelect(hint, &out_input, base_folder, path_filter, dnd_key, open_subdirectories, context_callback);
-    *out = out_input.string();
-    return changed;
-}
-
-bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
-    if (!fs::exists(base_folder))
-        fs::create_directory(base_folder);
+bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, std::function<bool(const FilePath&)> path_filter, const char* dnd_key, int open_subdirectories, const std::function<void(const FilePath&)>& context_callback) {
+    if (!fs::exists(base_folder.abs_path()))
+        fs::create_directories(base_folder.abs_path());
 
     bool has_width = false;
     float desired_width = 0.0f;
     if (GImGui->NextItemData.Flags & ImGuiNextItemDataFlags_HasWidth) {
-        float hint_width = ImGui::CalcTextSize(hint.c_str(), 0, true).x;
+        float hint_width = ImGui::CalcTextSize(hint, 0, true).x;
         desired_width = GImGui->NextItemData.Width - hint_width;
         has_width = true;
         GImGui->NextItemData.Flags &= ~ImGuiNextItemDataFlags_HasWidth;
@@ -185,18 +180,18 @@ bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, 
     
     
     bool changed = false;
-    PushID(hint.c_str());
+    PushID(hint);
     BeginGroup();
     {
         if (Button(ICON_FA_FOLDER))
             OpenPopup("File Select");
         SameLine();
-        string out_string = out->string();
+        string out_string = out->rel_string();
         if (has_width) {
             ImGui::SetNextItemWidth(desired_width);
         }
-        if (InputText(hint.c_str(), &out_string)) {
-            *out = fs::path(out_string);
+        if (InputText(hint, &out_string)) {
+            *out = FilePath(out_string);
             changed = true;
         }
     }
@@ -219,13 +214,13 @@ bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, 
     return changed;
 }
 
-bool PathSelectBody(fs::path* out, const fs::path& base_folder, const std::function<bool(const fs::path&)>& filter, bool* close_popup, int open_subdirectories, const std::function<void(const fs::path&)>& context_callback) {
+bool PathSelectBody(FilePath* out, const FilePath& base_folder, const std::function<bool(const FilePath&)>& filter, bool* close_popup, int open_subdirectories, const std::function<void(const FilePath&)>& context_callback) {
     spellbook::v2 size = close_popup == nullptr ?
         spellbook::v2(GetContentRegionAvail()) :
         spellbook::v2(GetContentRegionAvail()) - spellbook::v2(0, GetFrameHeightWithSpacing());
     BeginChild("Directory", ImVec2(size));
     SetNextItemOpen(true, ImGuiCond_Appearing);
-    bool changed = InspectDirectory(fs::path(base_folder), out, filter, open_subdirectories, context_callback);
+    bool changed = InspectDirectory(base_folder, out, filter, open_subdirectories, context_callback);
     EndChild();
 
     if (close_popup != nullptr)

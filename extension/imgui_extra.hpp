@@ -1,44 +1,41 @@
 #pragma once
 
-#include <filesystem>
 #include <functional>
 #include <type_traits>
 
 #include <imgui.h>
 #include <magic_enum.hpp>
 
+#include "extension/icons/font_awesome4.h"
 #include "general/string.hpp"
 #include "general/vector.hpp"
 #include "general/math/matrix.hpp"
-#include "extension/icons/font_awesome4.h"
-
-
-namespace fs = std::filesystem;
-
+#include "general/file/file_path.hpp"
 
 namespace ImGui {
+
+using spellbook::FilePath;
 
 bool DragMat3(const string& name, spellbook::m33* matrix, float speed, const string& format);
 bool DragMat4(const string& name, spellbook::m44* matrix, float speed, const string& format);
 bool DragMat4(const string& name, spellbook::m44GPU* matrix, float speed, const string& format);
 
 // Shows a selectable of path
-bool InspectFile(const fs::path& path, fs::path* p_selected, const std::function<void(const fs::path&)>& context_callback = {});
+bool InspectFile(const FilePath& path, FilePath* p_selected, const std::function<void(const FilePath&)>& context_callback = {});
 
 // Shows a selectable treenode of path, recurses directory contents
-bool InspectDirectory(const fs::path& path, fs::path* p_selected, const std::function<bool(const fs::path&)>& filter, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
+bool InspectDirectory(const FilePath& path, FilePath* p_selected, const std::function<bool(const FilePath&)>& filter, int open_subdirectories = 1, const std::function<void(const FilePath&)>& context_callback = {});
 
 // Enables the last item as a drag and drop source
-void PathSource(const fs::path& in_path, string dnd_key = "");
+void PathSource(const FilePath& in_path, const char* dnd_key = "");
 
 // Enables the last item as a drag and drop target
-void PathTarget(fs::path* out, const string& dnd_key);
+void PathTarget(FilePath* out, const char* dnd_key);
 
 // A widget to select paths
-bool PathSelect(const string& hint, fs::path* out, const fs::path& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
-bool PathSelect(const string& hint, string* out, const string& base_folder, std::function<bool(const fs::path&)> path_filter, const string& dnd_key, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
+bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, std::function<bool(const FilePath&)> path_filter, const char* dnd_key, int open_subdirectories = 1, const std::function<void(const FilePath&)>& context_callback = {});
 
-bool PathSelectBody(fs::path* out, const fs::path& base_folder, const std::function<bool(const fs::path&)>& filter, bool* p_open = nullptr, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {});
+bool PathSelectBody(FilePath* out, const FilePath& base_folder, const std::function<bool(const FilePath&)>& filter, bool* p_open = nullptr, int open_subdirectories = 1, const std::function<void(const FilePath&)>& context_callback = {});
 
 template <typename J>
 concept combo_enum_concept = std::is_enum_v<J>;

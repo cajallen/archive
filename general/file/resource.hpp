@@ -20,6 +20,7 @@ enum FileCategory {
 bool inspect_dependencies(vector<FilePath>& dependencies, const FilePath& current_path);
 
 FilePath get_resource_folder();
+FilePath get_external_resource_folder();
 FilePath resource_path(string_view val);
 FilePath operator""_rp(const char* str, uint64 length);
 
@@ -27,11 +28,19 @@ struct Resource {
     FilePath file_path;
     vector<FilePath> dependencies;
 
-    static constexpr string_view extension() { return ".sbgen"; }
+    static constexpr string_view extension() { return ".sbjgen"; }
     static constexpr string_view dnd_key() { return "DND_GENERAL"; }
     static constexpr FileCategory file_category() { return FileCategory_Json; }
-    static string folder() { return (get_resource_folder()).abs_string(); }
-    static std::function<bool(const fs::path&)> path_filter() { return [](const fs::path& path) { return path.extension().string() == Resource::extension(); }; }
+    static FilePath folder() { return get_resource_folder(); }
+    static std::function<bool(const FilePath&)> path_filter() { return [](const FilePath& path) { return path.extension() == Resource::extension(); }; }
+};
+
+struct Directory {
+    static constexpr string_view extension() { return "?"; }
+    static constexpr string_view dnd_key() { return "DND_DIRECTORY"; }
+    static constexpr FileCategory file_category() { return FileCategory_Other; }
+    static FilePath folder() { return get_resource_folder(); }
+    static std::function<bool(const FilePath&)> path_filter() { return [](const FilePath& path) { return is_directory(path.abs_path()); }; }
 };
 
 template <typename T>
@@ -86,24 +95,12 @@ T& load_resource(const FilePath& file_path, bool assert_exists = false, bool cle
 namespace ImGui {
 
 template <typename T>
-bool PathSelect(const string& hint, spellbook::FilePath* out, const spellbook::FilePath& base_folder, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {}) {
-    fs::path out_path = out->abs_path();
-    bool changed = PathSelect(hint, &out_path, base_folder.abs_string(), T::path_filter(), string(T::dnd_key()), open_subdirectories, context_callback);
-    if (changed) {
-        *out = spellbook::FilePath(out_path);
-        return true;
-    }
-    return false;
+bool PathSelect(const char* hint, spellbook::FilePath* out, const spellbook::FilePath& base_folder, int open_subdirectories = 1, const std::function<void(const FilePath&)>& context_callback = {}) {
+    return PathSelect(hint, out, base_folder, T::path_filter(), T::dnd_key().data(), open_subdirectories, context_callback);
 }
 template <typename T>
-bool PathSelect(const string& hint, spellbook::FilePath* out, int open_subdirectories = 1, const std::function<void(const fs::path&)>& context_callback = {}) {
-    fs::path out_path = out->abs_path();
-    bool changed = PathSelect(hint, &out_path, string(T::folder()), T::path_filter(), string(T::dnd_key()), open_subdirectories, context_callback);
-    if (changed) {
-        *out = spellbook::FilePath(out_path);
-        return true;
-    }
-    return false;
+bool PathSelect(const char* hint, spellbook::FilePath* out, int open_subdirectories = 1, const std::function<void(const FilePath&)>& context_callback = {}) {
+    return PathSelect(hint, out, T::folder(), T::path_filter(), T::dnd_key().data(), open_subdirectories, context_callback);
 }
 
 }
