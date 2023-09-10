@@ -12,10 +12,14 @@ add_library(archive
     general/astar.cpp
     general/bitmask_3d.cpp
     general/color.cpp
-    general/json.cpp
     general/logger.cpp
     general/navigation_path.cpp
-    general/file_path.cpp
+    general/input.cpp
+    general/file/asset_loader.cpp
+    general/file/file_cache.cpp
+    general/file/file_path.cpp
+    general/file/json.cpp
+    general/file/resource.cpp
 )
 
 target_compile_definitions(archive PUBLIC

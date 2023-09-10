@@ -3,7 +3,7 @@
 #include <array>
 
 #include "general/vector.hpp"
-#include "general/json.hpp"
+#include "general/file/json.hpp"
 #include "general/math/geometry.hpp"
 
 using std::array;

@@ -2,7 +2,7 @@
 
 #include "general/string.hpp"
 #include "general/hash.hpp"
-#include "general/json.hpp"
+#include "general/file/json.hpp"
 
 namespace vuk {
 struct Extent2D;

@@ -2,7 +2,7 @@
 
 #include <robin_hood.h>
 
-#include "general/json.hpp"
+#include "json.hpp"
 
 namespace spellbook {
 
@@ -35,7 +35,8 @@ struct FilePath {
         return value == rhs.value;
     }
 
- private:
+    FilePath operator + (string_view rhs) const;
+
     inline static string root_dir_value;
     void standardize();
     void standardize(string& s, bool directory) const;
@@ -48,6 +49,9 @@ json_value to_jv(const FilePath& value);
 uint64 hash_path(const FilePath& file_path);
 
 FilePath operator""_fp(const char* str, uint64 length);
+
+string get_contents(const FilePath& file, bool binary = false);
+vector<uint32> get_contents_uint32(const FilePath& file, bool binary = true);
 
 }
 

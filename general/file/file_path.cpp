@@ -54,6 +54,16 @@ string FilePath::stem() const {
     return rel_path().stem().string();
 }
 
+FilePath FilePath::operator + (string_view rhs) const {
+    assert_else(!symbolic)
+        return *this;
+
+    FilePath new_path;
+    new_path.value = this->value + string(rhs);
+    new_path.standardize();
+    return new_path;
+}
+
 void FilePath::standardize() {
     if (symbolic)
         return;
@@ -101,6 +111,45 @@ uint64 hash_path(const FilePath& file_path) {
     if (file_path.symbolic)
         return hash_view(file_path.value);
     return hash_view(file_path.rel_string_view());
+}
+
+string get_contents(const FilePath& file_name, bool binary) {
+    string path = file_name.abs_string();
+    FILE* f = fopen(path.c_str(), !binary ? "r" : "rb");
+    if (f == nullptr)
+        return {};
+
+    fseek(f, 0, SEEK_END);
+    size_t size = ftell(f) / sizeof(char);
+    string contents;
+    contents.resize(size);
+    rewind(f);
+
+    size_t read_bytes = fread(contents.data(), sizeof(char), size, f);
+
+    fclose(f);
+
+    contents.resize(std::min(strlen(contents.data()), read_bytes));
+    return contents;
+}
+
+vector<uint32> get_contents_uint32(const FilePath& file_name, bool binary) {
+    string path = file_name.abs_string();
+    FILE* f = fopen(path.c_str(), !binary ? "r" : "rb");
+    if (f == nullptr)
+        return {};
+
+    fseek(f, 0, SEEK_END);
+    size_t    size = ftell(f) / sizeof(uint32);
+    vector<uint32> contents;
+    contents.resize(size);
+    rewind(f);
+
+    fread(&contents[0], sizeof(uint32), size, f);
+
+    fclose(f);
+
+    return contents;
 }
 
 }
