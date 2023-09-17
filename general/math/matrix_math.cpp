@@ -12,7 +12,7 @@ m44 perspective(float v_fov_r, float aspect_xy, float near) {
 }
 
 m44 orthographic(v3 extents) {
-    m44 result = {1.0f / extents.x, 0, 0, 0, 0, -1.0f / extents.y, 0, 0, 0, 0, 1.0f / extents.z, 1.0f, 0, 0, 0, 1.0f};
+    m44 result = {1.0f / extents.x, 0, 0, 0, 0, 1.0f / extents.y, 0, 0, 0, 0, 1.0f / extents.z, 1.0f, 0, 0, 0, 1.0f};
     return result;
 }
 
