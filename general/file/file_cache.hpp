@@ -15,12 +15,9 @@ struct FileCache {
 
     vector<FilePath> load_dependencies(json& j);
 
-    static FileCache& get() {
-        static FileCache file_cache;
-        return file_cache;
-    }
 };
 
+FileCache& get_file_cache();
 
 
 }

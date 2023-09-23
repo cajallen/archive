@@ -1,28 +1,31 @@
 ﻿#include "file_path.hpp"
 
 #include <magic_enum.hpp>
+#include <windows.h>
+#include <knownfolders.h>
+#include <shlobj.h>
 
 #include "general/logger.hpp"
+#include "general/file/resource.hpp"
+
 
 namespace spellbook {
 
 FilePath::FilePath() {}
-FilePath::FilePath(string_view val, bool symbolic) : value(val), symbolic(symbolic) {
+FilePath::FilePath(string_view val, FilePathLocation location) : value(val), location(location) {
     standardize();
 }
-FilePath::FilePath(const string& val, bool symbolic) : value(val), symbolic(symbolic) {
+FilePath::FilePath(const string& val, FilePathLocation location) : value(val), location(location) {
     standardize();
 }
-FilePath::FilePath(const fs::path& val) : value(val.string()) {
+FilePath::FilePath(const fs::path& val, FilePathLocation location) : value(val.string()), location(location) {
     standardize();
 }
-FilePath::FilePath(const char* val, bool symbolic) : value(val), symbolic(symbolic) {
+FilePath::FilePath(const char* val, FilePathLocation location) : value(val), location(location) {
     standardize();
 }
 
 string FilePath::abs_string() const {
-    if (symbolic)
-        return value;
     return root_dir() + value;
 }
 fs::path FilePath::abs_path() const {
@@ -43,7 +46,7 @@ const char* FilePath::rel_c_str() const {
 }
 
 bool FilePath::is_file() const {
-    if (symbolic)
+    if (location == FilePathLocation_Symbolic)
         return !value.empty();
     return value.find_first_of('.') != string::npos;
 }
@@ -59,62 +62,154 @@ string FilePath::stem() const {
 }
 
 FilePath FilePath::operator + (string_view rhs) const {
-    assert_else(!symbolic)
-        return *this;
-
     FilePath new_path;
     new_path.value = this->value + string(rhs);
     new_path.standardize();
     return new_path;
 }
 
+string FilePath::root_dir() const {
+    switch (location) {
+        case FilePathLocation_Content: {
+            return get_content_dir_path();
+        }
+        case FilePathLocation_Config: {
+            string path = get_appdata_local_path();
+            return path + "spellbook/";
+        }
+        case FilePathLocation_Symbolic: {
+            return "";
+        }
+        case FilePathLocation_Distributed: {
+            return get_distributed_dir_path();
+        }
+        default: assert_else(false) return "";
+    }
+}
+
 void FilePath::standardize() {
-    if (symbolic)
+    if (location == FilePathLocation_Symbolic)
         return;
-    standardize(value, false);
+    standardize(value, is_file());
+
+
     if (value.starts_with(root_dir()))
         value = value.substr(root_dir().size());
 
     // These aren't supported.
     sb_assert(value.find("..") == string::npos && value.find("./") == string::npos);
 }
-void FilePath::standardize(string& s, bool directory) const {
+void FilePath::standardize(string& s, bool directory) {
     std::replace(s.begin(), s.end(), '\\', '/');
     if (directory)
         if (s.back() != '/')
             s.push_back('/');
 }
 
-const string& FilePath::root_dir() const {
-    if (root_dir_value.empty()) {
-#ifdef RESOURCE_PARENT_DIR
-        fs::path p(RESOURCE_PARENT_DIR);
-#else
-        fs::path p = fs::current_path();
-#endif
-        root_dir_value = p.string();
-        standardize(root_dir_value, true);
-    }
-    return root_dir_value;
-}
-
 FilePath from_jv_impl(const json_value& jv, FilePath* _) {
     string s = from_jv<string>(jv);
     // we don't save directories, so can check for extension to see if it's symbolic
-    return FilePath(s, s.find('.') == std::string::npos);
+    return FilePath(s, s.find('.') == std::string::npos ? FilePathLocation_Symbolic : FilePathLocation_Content);
 }
 json_value to_jv(const FilePath& value) {
     return to_jv(value.rel_string());
 }
 
-FilePath operator""_fp(const char* str, uint64 length) {
-    return FilePath(std::string(str, length));
+FilePath operator""_content(const char* str, uint64 length) {
+    return FilePath(std::string(str, length), FilePathLocation_Content);
+}
+FilePath operator""_symbolic(const char* str, uint64 length) {
+    return FilePath(std::string(str, length), FilePathLocation_Symbolic);
+}
+FilePath operator""_config(const char* str, uint64 length) {
+    return FilePath(std::string(str, length), FilePathLocation_Config);
+}
+FilePath operator""_distributed(const char* str, uint64 length) {
+    return FilePath(std::string(str, length), FilePathLocation_Distributed);
 }
 
 uint64 hash_path(const FilePath& file_path) {
-    if (file_path.symbolic)
-        return hash_view(file_path.value);
-    return hash_view(file_path.rel_string_view());
+    return hash_view(file_path.abs_string());
+}
+
+string& get_appdata_local_path() {
+    static string appdata_local_path;
+    if (appdata_local_path.empty()) {
+        WCHAR wchar_path[MAX_PATH];
+        assert_else(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, (PWSTR*) &wchar_path) == S_OK) {
+
+        }
+        std::wstring wstring_path(wchar_path);
+        appdata_local_path = string(wstring_path.begin(), wstring_path.end());
+        FilePath::standardize(appdata_local_path, true);
+    }
+    return appdata_local_path;
+}
+
+const string& get_default_content_path() {
+    static string default_content_path;
+    if (default_content_path.empty()) {
+        WCHAR wchar_path[MAX_PATH];
+        assert_else(SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, (PWSTR*) &wchar_path) == S_OK) {
+
+        }
+        std::wstring wstring_path(wchar_path);
+        default_content_path = string(wstring_path.begin(), wstring_path.end());
+        FilePath::standardize(default_content_path, true);
+        default_content_path += "spellbook/";
+    }
+    return default_content_path;
+}
+
+string& get_distributed_dir_path() {
+    static string distributed_path;
+    if (distributed_path.empty()) {
+#ifdef DISTRIBUTED_DIR
+        fs::path p(DISTRIBUTED_DIR);
+#else
+        fs::path p = fs::current_path();
+#endif
+        distributed_path = p.string();
+        FilePath::standardize(distributed_path, true);
+    }
+    return distributed_path;
+}
+
+const FilePath& get_config_path() {
+    static FilePath config_path;
+    if (config_path.value.empty()) {
+        config_path = FilePath("config" + string(Resource::extension()), FilePathLocation_Config);
+    }
+    return config_path;
+}
+
+string& get_content_dir_path() {
+    static string content_dir_path;
+
+    if (content_dir_path.empty()) {
+        const FilePath& config_path = get_config_path();
+        if (fs::exists(config_path.abs_path())) {
+            json j = parse_file(config_path.abs_string());
+            if (j.contains("content_dir")) {
+                content_dir_path = from_jv<string>(*j.at("content_dir"));
+                return content_dir_path;
+            }
+        }
+
+        set_content_dir_path(get_default_content_path());
+        return content_dir_path;
+    }
+}
+
+void set_content_dir_path(string_view abs_path) {
+    string& content_dir_path = get_content_dir_path();
+    content_dir_path = abs_path;
+    FilePath::standardize(content_dir_path, true);
+
+    const FilePath& config_path = get_config_path();
+    json j = fs::exists(config_path.abs_path()) ? parse_file(config_path.abs_string()) : json{};
+    j["content_dir"] = make_shared<json_value>(to_jv(content_dir_path));
+    file_dump(j, config_path.abs_string());
 }
 
 string get_contents(const FilePath& file_name, bool binary) {

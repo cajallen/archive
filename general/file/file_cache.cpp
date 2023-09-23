@@ -7,6 +7,11 @@ namespace spellbook {
 
 constexpr bool print_file_load_info = false;
 
+FileCache& get_file_cache() {
+    static FileCache file_cache;
+    return file_cache;
+}
+
 json& FileCache::load_json(const FilePath& file_path) {
     if (parsed_jsons.contains(file_path))
         return parsed_jsons[file_path];

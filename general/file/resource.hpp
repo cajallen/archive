@@ -4,6 +4,7 @@
 
 #include "extension/imgui_extra.hpp"
 #include "general/logger.hpp"
+#include "general/memory.hpp"
 #include "general/file/file_path.hpp"
 #include "general/file/file_cache.hpp"
 
@@ -30,7 +31,6 @@ struct Resource {
 
     static constexpr string_view extension() { return ".sbjgen"; }
     static constexpr string_view dnd_key() { return "DND_GENERAL"; }
-    static constexpr FileCategory file_category() { return FileCategory_Json; }
     static FilePath folder() { return get_resource_folder(); }
     static std::function<bool(const FilePath&)> path_filter() { return [](const FilePath& path) { return path.extension() == Resource::extension(); }; }
 };
@@ -38,14 +38,13 @@ struct Resource {
 struct Directory {
     static constexpr string_view extension() { return "?"; }
     static constexpr string_view dnd_key() { return "DND_DIRECTORY"; }
-    static constexpr FileCategory file_category() { return FileCategory_Other; }
     static FilePath folder() { return get_resource_folder(); }
     static std::function<bool(const FilePath&)> path_filter() { return [](const FilePath& path) { return is_directory(path.abs_path()); }; }
 };
 
 template <typename T>
-umap<FilePath, std::unique_ptr<T>>& cpu_resource_cache() {
-    static umap<FilePath, std::unique_ptr<T>> t_cache;
+umap<FilePath, unique_ptr<T>>& cpu_resource_cache() {
+    static umap<FilePath, unique_ptr<T>> t_cache;
     return t_cache;
 }
 
@@ -82,10 +81,10 @@ T& load_resource(const FilePath& file_path, bool assert_exists = false, bool cle
         return *cpu_resource_cache<T>().emplace(file_path, std::make_unique<T>()).first->second;
     }
 
-    json& j = FileCache::get().load_json(file_path);
+    json& j = get_file_cache().load_json(file_path);
 
     T& t = *cpu_resource_cache<T>().emplace(file_path, std::make_unique<T>(from_jv<T>(to_jv(j)))).first->second;
-    t.dependencies = FileCache::get().load_dependencies(j);
+    t.dependencies = get_file_cache().load_dependencies(j);
     t.file_path = file_path;
     return t;
 }
