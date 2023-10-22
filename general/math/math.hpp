@@ -20,6 +20,8 @@ bool contains(range r, float f);
 bool contains(range2 r, v2 v);
 bool contains(range2i r, v2i v);
 bool contains(range3 r, v3 v);
+bool aabb_overlaps(range2 r, range2 v);
+bool line_intersects_aabb(range2 line, range2 box);
 
 int32 round_cast(float value);
 v2i round_cast(v2 value);

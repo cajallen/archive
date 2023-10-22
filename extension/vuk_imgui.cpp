@@ -7,6 +7,7 @@
 #include <vuk/RenderGraph.hpp>
 
 #include "extension/icons/font_awesome4.h"
+#include "general/file/file_path.hpp"
 
 namespace spellbook {
 
@@ -23,6 +24,7 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler,
         ImFontConfig         icons_config;
         icons_config.MergeMode  = true;
         icons_config.PixelSnapH = true;
+        icons_config.GlyphOffset = {0.0f, 2.0f};
         io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FA, 14.0f, &icons_config, icons_ranges);
     }
 
@@ -51,6 +53,7 @@ ImGuiData ImGui_ImplVuk_Init(vuk::Allocator& allocator, vuk::Compiler& compiler,
         pci.add_spirv(std::vector(shader_info.frag_contents.begin(), shader_info.frag_contents.end()), shader_info.frag_path);
         ctx.create_named_pipeline("imgui", pci);
     }
+
     return data;
 }
 
@@ -145,8 +148,8 @@ vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, 
                        clip_rect.z = (pcmd->ClipRect.z - clip_off.x) * clip_scale.x;
                        clip_rect.w = (pcmd->ClipRect.w - clip_off.y) * clip_scale.y;
 
-                       auto fb_width  = command_buffer.get_ongoing_renderpass().extent.width;
-                       auto fb_height = command_buffer.get_ongoing_renderpass().extent.height;
+                       auto fb_width  = command_buffer.get_ongoing_render_pass().extent.width;
+                       auto fb_height = command_buffer.get_ongoing_render_pass().extent.height;
                        if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f) {
                            // Negative offsets are illegal for vkCmdSetScissor
                            if (clip_rect.x < 0.0f)
@@ -185,7 +188,8 @@ vuk::Future ImGui_ImplVuk_Render(vuk::Allocator& allocator, vuk::Future target, 
                                1,
                                pcmd->IdxOffset + global_idx_offset,
                                pcmd->VtxOffset + global_vtx_offset,
-                               0);
+                               0
+                           );
                        }
                    }
                }

@@ -6,6 +6,7 @@
 #include "extension/fmt.hpp"
 #include "extension/fmt_geometry.hpp"
 #include "general/logger.hpp"
+#include "general/file/file_path.hpp"
 
 namespace spellbook {
 

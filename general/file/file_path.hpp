@@ -35,6 +35,7 @@ struct FilePath {
     string filename() const;
     string extension() const;
     string stem() const;
+    fs::path parent_path() const;
 
     bool operator==(const FilePath& rhs) const {
         // symbolic doesn't distinguish
