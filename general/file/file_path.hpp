@@ -69,6 +69,8 @@ string& get_distributed_dir_path();
 string& get_content_dir_path();
 void set_content_dir_path(string_view abs_path);
 
+string& get_filepath_app_name();
+
 }
 
 template<>

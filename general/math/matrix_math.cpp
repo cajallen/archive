@@ -16,19 +16,6 @@ m44 orthographic(v3 extents) {
     return result;
 }
 
-m44 voxelization_mat(v3 extents) {
-    // we double z because NDC is only half-z
-    extents.z *= 2.0f;
-    m44 result = {
-            1.0f / extents.x, 0, 0, 0,
-            0, 1.0f / extents.y, 0, 0,
-            0, 0, 1.0f / extents.z, 1.0f,
-            0, 0, 0, 1.0f
-    };
-    return result;
-}
-
-
 m44 look(v3 eye, v3 vec, v3 up) {
     // NOTE: z-axis points in the opposite direction to how depth maps
     v3 z_axis = -math::normalize(vec);
