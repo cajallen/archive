@@ -31,6 +31,31 @@ bool contains(range2 r, v2 v) {
     return r.start[0] < v[0] && v[0] < r.end[0] && r.start[1] < v[1] && v[1] < r.end[1];
 }
 
+bool aabb_overlaps(range2 r1, range2 r2) {
+    v2 e1 = 0.5f * math::abs(r1.end - r1.start);
+    v2 e2 = 0.5f * math::abs(r2.end - r2.start);
+    v2 c1 = 0.5f * math::abs(r1.start + r1.end);
+    v2 c2 = 0.5f * math::abs(r2.start + r2.end);
+
+    bool x = math::abs(c1.x - c2.x) <= (e1.x + e2.x);
+    bool y = math::abs(c1.y - c2.y) <= (e1.y + e2.y);
+
+    return x && y;
+}
+
+bool line_intersects_aabb(range2 line, range2 box) {
+    v2 min = v2(math::min(box.start.x, box.end.x), math::min(box.start.y, box.end.y));
+    v2 max = v2(math::max(box.start.x, box.end.x), math::max(box.start.y, box.end.y));
+    float dist;
+    if (ray_aabb_intersection(line.start, math::normalize(line.end - line.start), min, max, &dist)) {
+        if (dist < math::distance(line.start, line.end)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool contains(range2i r, v2i v) {
     return r.start[0] <= v[0] && v[0] < r.end[0] && r.start[1] <= v[1] && v[1] < r.end[1];
 }

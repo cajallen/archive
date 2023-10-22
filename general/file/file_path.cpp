@@ -61,6 +61,10 @@ string FilePath::stem() const {
     return rel_path().stem().string();
 }
 
+fs::path FilePath::parent_path() const {
+    return this->abs_path().parent_path();
+}
+
 FilePath FilePath::operator + (string_view rhs) const {
     FilePath new_path;
     new_path.value = this->value + string(rhs);
@@ -71,7 +75,8 @@ FilePath FilePath::operator + (string_view rhs) const {
 string FilePath::root_dir() const {
     switch (location) {
         case FilePathLocation_Content: {
-            return get_content_dir_path();
+            string path = get_content_dir_path();
+            return path;
         }
         case FilePathLocation_Config: {
             string path = get_appdata_local_path();
@@ -81,16 +86,17 @@ string FilePath::root_dir() const {
             return "";
         }
         case FilePathLocation_Distributed: {
-            return get_distributed_dir_path();
+            string path = get_distributed_dir_path();
+            return path;
         }
         default: assert_else(false) return "";
     }
 }
 
 void FilePath::standardize() {
-    if (location == FilePathLocation_Symbolic)
+    if (location == FilePathLocation_Symbolic || value.empty())
         return;
-    standardize(value, is_file());
+    standardize(value, !is_file());
 
 
     if (value.starts_with(root_dir()))
@@ -112,7 +118,9 @@ FilePath from_jv_impl(const json_value& jv, FilePath* _) {
     return FilePath(s, s.find('.') == std::string::npos ? FilePathLocation_Symbolic : FilePathLocation_Content);
 }
 json_value to_jv(const FilePath& value) {
-    return to_jv(value.rel_string());
+    FilePath copy = value;
+    copy.standardize();
+    return to_jv(copy.rel_string());
 }
 
 FilePath operator""_content(const char* str, uint64 length) {
@@ -129,18 +137,21 @@ FilePath operator""_distributed(const char* str, uint64 length) {
 }
 
 uint64 hash_path(const FilePath& file_path) {
-    return hash_view(file_path.abs_string());
+    return hash_view(file_path.rel_string_view()) ^ uint64(file_path.location);
 }
 
 string& get_appdata_local_path() {
     static string appdata_local_path;
     if (appdata_local_path.empty()) {
-        WCHAR wchar_path[MAX_PATH];
-        assert_else(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, (PWSTR*) &wchar_path) == S_OK) {
+        PWSTR wchar_path = NULL;
+        assert_else(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &wchar_path) == S_OK) {
 
         }
         std::wstring wstring_path(wchar_path);
-        appdata_local_path = string(wstring_path.begin(), wstring_path.end());
+        CoTaskMemFree(wchar_path);
+
+        std::transform(wstring_path.begin(), wstring_path.end(), std::back_inserter(appdata_local_path), [] (wchar_t c) { return (char)c; });
+
         FilePath::standardize(appdata_local_path, true);
     }
     return appdata_local_path;
@@ -149,12 +160,16 @@ string& get_appdata_local_path() {
 const string& get_default_content_path() {
     static string default_content_path;
     if (default_content_path.empty()) {
-        WCHAR wchar_path[MAX_PATH];
-        assert_else(SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, (PWSTR*) &wchar_path) == S_OK) {
+        PWSTR wchar_path = NULL;
+        assert_else(SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &wchar_path) == S_OK) {
 
         }
         std::wstring wstring_path(wchar_path);
-        default_content_path = string(wstring_path.begin(), wstring_path.end());
+
+        CoTaskMemFree(wchar_path);
+
+        std::transform(wstring_path.begin(), wstring_path.end(), std::back_inserter(default_content_path), [] (wchar_t c) { return (char)c; });
+
         FilePath::standardize(default_content_path, true);
         default_content_path += "spellbook/";
     }
@@ -196,19 +211,17 @@ string& get_content_dir_path() {
             }
         }
 
-        set_content_dir_path(get_default_content_path());
-        return content_dir_path;
+        content_dir_path = get_default_content_path();
+        set_content_dir_path(content_dir_path);
     }
+
+    return content_dir_path;
 }
 
 void set_content_dir_path(string_view abs_path) {
-    string& content_dir_path = get_content_dir_path();
-    content_dir_path = abs_path;
-    FilePath::standardize(content_dir_path, true);
-
     const FilePath& config_path = get_config_path();
     json j = fs::exists(config_path.abs_path()) ? parse_file(config_path.abs_string()) : json{};
-    j["content_dir"] = make_shared<json_value>(to_jv(content_dir_path));
+    j["content_dir"] = make_shared<json_value>(to_jv(string(abs_path)));
     file_dump(j, config_path.abs_string());
 }
 

@@ -76,7 +76,7 @@ struct Color {
 
 
     static Color hsl_oklab(float hue, float chroma, float lum);
-    static Color hsv(float h, float s, float v, float a = 1.0f) {
+    static constexpr Color hsv(float h, float s, float v, float a = 1.0f) {
         v3 rgb = math::clamp(
             math::abs((v3(h/360.f*6.f)+v3(0.f,4.f,2.f)) % 6.f - 3.f)-v3(1.f), 
             v3(0.f), 
@@ -146,7 +146,16 @@ const Color academy_7 = Color::hsv(235.0f - 20.0f, 0.70f, 0.3f);
 const Color academy_8 = Color::hsv(240.0f - 20.0f, 0.80f, 0.2f);
 const Color academy_gray = mix(Color(palette::academy_3), Color(palette::gray_5), 0.50f);
 
-
+const Color node_editor_0 = Color::hsv(320.0f, 0.00f, 1.0f);
+const Color node_editor_1 = Color::hsv(320.0f, 0.02f, 0.9f);
+const Color node_editor_2 = Color::hsv(320.0f, 0.04f, 0.8f);
+const Color node_editor_3 = Color::hsv(320.0f, 0.06f, 0.7f);
+const Color node_editor_4 = Color::hsv(320.0f, 0.08f, 0.6f);
+const Color node_editor_5 = Color::hsv(320.0f, 0.12f, 0.5f);
+const Color node_editor_6 = Color::hsv(320.0f, 0.16f, 0.4f);
+const Color node_editor_7 = Color::hsv(320.0f, 0.18f, 0.3f);
+const Color node_editor_8 = Color::hsv(320.0f, 0.20f, 0.2f);
+const Color node_editor_gray = mix(Color(palette::node_editor_3), Color(palette::gray_5), 0.50f);
 
 // https://htmlcolorcodes.com/color-names/
 constexpr Color indian_red(205.f/255.f, 92.f/255.f, 92.f/255.f);

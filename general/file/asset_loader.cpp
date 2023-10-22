@@ -18,6 +18,8 @@ void save_asset_file(const AssetFile& asset_file) {
     const uint32 version     = asset_file.version;
     const uint32 json_length = (uint32) json_string.size();
     const uint32 blob_length = (uint32) asset_file.binary_blob.size();
+    array<char, 4> type; // legacy
+    outfile.write(type.data(), 4);
     outfile.write((const char*) &version, sizeof(uint32));
     outfile.write((const char*) &json_length, sizeof(uint32));
     outfile.write((const char*) &blob_length, sizeof(uint32));
@@ -40,7 +42,9 @@ AssetFile load_asset_file(const FilePath& file_path) {
 
     uint32 json_length = 0;
     uint32 blob_length = 0;
-    infile.seekg(0);
+
+    array<char, 4> type;
+    infile.read(type.data(), 4);
     infile.read((char*) &asset_file.version, sizeof(uint32));
     infile.read((char*) &json_length, sizeof(uint32));
     infile.read((char*) &blob_length, sizeof(uint32));

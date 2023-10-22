@@ -23,7 +23,7 @@ bool inspect_dependencies(vector<FilePath>& dependencies, const FilePath& curren
 FilePath get_resource_folder();
 FilePath get_external_resource_folder();
 FilePath resource_path(string_view val);
-FilePath operator""_rp(const char* str, uint64 length);
+FilePath operator""_resource(const char* str, uint64 length);
 
 struct Resource {
     FilePath file_path;

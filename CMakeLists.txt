@@ -23,7 +23,7 @@ add_library(archive
 )
 
 target_compile_definitions(archive PUBLIC
-    RESOURCE_PARENT_DIR=\"${RESOURCE_PARENT_DIR}\"
+    DISTRIBUTED_DIR=\"${DISTRIBUTED_DIR}\"
 )
 
 target_include_directories(archive PUBLIC .)

@@ -41,9 +41,9 @@ bool inspect_dependencies(vector<FilePath>& dependencies, const FilePath& curren
     return changed;
 }
 
-FilePath get_resource_folder() { return FilePath("resources/"); }
-FilePath get_external_resource_folder() { return FilePath("external/"); }
+FilePath get_resource_folder() { return "resources"_content; }
+FilePath get_external_resource_folder() { return "external"_content; }
 FilePath resource_path(string_view val) { return get_resource_folder() + string(val); }
-FilePath operator""_rp(const char* str, uint64 length) { return resource_path(string_view{str, length}); }
+FilePath operator""_resource(const char* str, uint64 length) { return resource_path(string_view{str, length}); }
 
 }
