@@ -64,6 +64,11 @@ bool contains(range3 r, v3 v) {
     return r.start[0] < v[0] && v[0] < r.end[0] && r.start[1] < v[1] && v[1] < r.end[1] && r.start[2] < v[2] && v[2] < r.end[2];
 }
 
+void expand(range2i& r, v2i v) {
+    r.start = math::min(r.start, v);
+    r.end = math::max(r.end, v);
+}
+
 int32 round_cast(float value) {
     return (int32) math::round(value);
 }

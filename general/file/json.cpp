@@ -175,7 +175,10 @@ string parse_quote(istream& iss) {
         iss.get(c);
         if (c == '\\') {
             iss.get(c);
-            out.push_back(c);
+            if (c == 'n')
+                out.push_back('\n');
+            else
+                out.push_back(c);
         } else {
             if (c == '"')
                 break;

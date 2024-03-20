@@ -4,8 +4,29 @@
 #include <vuk/Types.hpp>
 
 #include "general/math/math.hpp"
+#include "extension/fmt.hpp"
 
 namespace spellbook {
+
+char _read_color_char(string_view s, int8 index, char def) {
+    if (s.size() > index)
+        return s[index];
+    return def;
+}
+uint8 _interpret_hex_char(char c) {
+    if (std::isdigit(c)) {
+        return c - '0';
+    }
+    if (std::isalpha(c)) {
+        if (std::islower(c)) {
+            return c - 'a' + 10;
+        }
+        else {
+            return c - 'A' + 10;
+        }
+    }
+    return 0;
+}
 
 Color mix(Color c1, Color c2, float amt) {
     return Color {c1.r * c1.a * (1.0f - amt) + c2.r * c2.a * amt,
@@ -16,6 +37,17 @@ Color mix(Color c1, Color c2, float amt) {
 
 bool operator==(const Color& lhs, const Color& rhs) {
     return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
+}
+
+Color32::Color32(string_view hex_str) {
+    r = _interpret_hex_char(_read_color_char(hex_str, 0, '0')) << 4 | _interpret_hex_char(_read_color_char(hex_str, 1, '0'));
+    g = _interpret_hex_char(_read_color_char(hex_str, 2, '0')) << 4 | _interpret_hex_char(_read_color_char(hex_str, 3, '0'));
+    b = _interpret_hex_char(_read_color_char(hex_str, 4, '0')) << 4 | _interpret_hex_char(_read_color_char(hex_str, 5, '0'));
+    a = _interpret_hex_char(_read_color_char(hex_str, 6, 'f')) << 4 | _interpret_hex_char(_read_color_char(hex_str, 7, 'f'));
+}
+
+string Color32::to_string() {
+    return fmt_("{:02x}{:02x}{:02x}{:02x}", r, g, b, a);
 }
 
 float srgb2linear(float x) {

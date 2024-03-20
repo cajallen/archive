@@ -115,7 +115,9 @@ void FilePath::standardize(string& s, bool directory) {
 FilePath from_jv_impl(const json_value& jv, FilePath* _) {
     string s = from_jv<string>(jv);
     // we don't save directories, so can check for extension to see if it's symbolic
-    return FilePath(s, s.find('.') == std::string::npos ? FilePathLocation_Symbolic : FilePathLocation_Content);
+    bool has_period = s.find('.') != std::string::npos;
+    bool has_slash = s.find('/') != std::string::npos || s.find('\\') != std::string::npos;
+    return FilePath(s, (has_period && has_slash) ? FilePathLocation_Content : FilePathLocation_Symbolic);
 }
 json_value to_jv(const FilePath& value) {
     FilePath copy = value;

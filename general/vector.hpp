@@ -25,6 +25,7 @@ struct vector {
     T& emplace(uint32 i, Args&&...args);
     T& insert(uint32 i, T&& t);
     T& insert(uint32 i, const T& t);
+    T& insert_search(const T& t);
 
     void append(const vector<T>& other);
     template <typename S>
@@ -131,6 +132,27 @@ template <typename T>
 T& vector<T>::insert(uint32 i, const T& t) {
     internal.insert(internal.begin() + i, t);
     return internal[i];
+}
+
+template <typename T>
+T& vector<T>::insert_search(const T& t) {
+    uint32 start = 0;
+    uint32 end = size();
+    uint32 mid = 0;
+    while (start < end) {
+        mid = (end + start) / 2;
+        if (t < this->at(mid)) {
+            end = mid;
+            continue;
+        }
+        if (t > this->at(mid)) {
+            start = mid + 1;
+            continue;
+        }
+        break;
+    }
+    mid = (end + start) / 2;
+    return insert(mid, t);
 }
 
 template <typename T>

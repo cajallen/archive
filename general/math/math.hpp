@@ -22,6 +22,7 @@ bool contains(range2i r, v2i v);
 bool contains(range3 r, v3 v);
 bool aabb_overlaps(range2 r, range2 v);
 bool line_intersects_aabb(range2 line, range2 box);
+void expand(range2i& r, v2i v);
 
 int32 round_cast(float value);
 v2i round_cast(v2 value);
@@ -306,6 +307,14 @@ v3_<T> mod(v3_<T> input, v3_<T> divisor) {
 
 inline float fract(float input) {
     return math::mod(input, 1.0f);
+}
+
+inline v2 fract(v2 input) {
+    return v2{math::mod(input.x, 1.0f), math::mod(input.y, 1.0f)};
+}
+
+inline v3 fract(v3 input) {
+    return v3{math::mod(input.x, 1.0f), math::mod(input.y, 1.0f), math::mod(input.z, 1.0f)};
 }
 
 float lerp_angle(float t, range r);

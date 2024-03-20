@@ -9,6 +9,7 @@ add_library(archive
     general/math/matrix.cpp
     general/math/math.cpp
     general/math/matrix_math.cpp
+    general/math/noise.cpp
     general/astar.cpp
     general/bitmask_3d.cpp
     general/color.cpp

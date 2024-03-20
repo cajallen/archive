@@ -97,6 +97,15 @@ struct Color {
 };
 
 JSON_IMPL(Color, r, g, b, a);
+struct Color32 {
+    uint8 r, g, b, a;
+    Color32() = default;
+    explicit Color32(string_view hex);
+    explicit Color32(const Color& c) : r(uint8(255.0f * c.r)), g(uint8(255.0f * c.g)), b(uint8(255.0f * c.b)), a(uint8(255.0f * c.a)){}
+    explicit Color32(uint8 red, uint8 green, uint8 blue, uint8 alpha = 255) : r(red), g(green), b(blue), a(alpha){}
+
+    string to_string();
+};
 
 bool operator==(const Color& lhs, const Color& rhs);
 Color mix(Color c1, Color c2, float amt);

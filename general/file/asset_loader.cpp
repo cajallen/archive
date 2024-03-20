@@ -7,6 +7,8 @@
 namespace spellbook {
 
 void save_asset_file(const AssetFile& asset_file) {
+    fs::create_directories(asset_file.file_path.abs_path().parent_path());
+
     std::ofstream outfile;
     outfile.open(asset_file.file_path.abs_string(), std::ios::binary | std::ios::out);
 
