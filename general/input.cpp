@@ -41,8 +41,6 @@ void Input::setup(GLFWwindow* input_window) {
     glfwSetDropCallback(window, default_drop_callback);
     glfwSetFramebufferSizeCallback(window, default_framebuffer_size_callback);
     ImGui_ImplGlfw_InstallCallbacks(window);
-
-    get_filepath_app_name() = "academy";
 }
 
 void Input::update() {
