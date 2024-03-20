@@ -80,7 +80,8 @@ string FilePath::root_dir() const {
         }
         case FilePathLocation_Config: {
             string path = get_appdata_local_path();
-            return path + "spellbook/";
+            assert_else(!get_filepath_app_name().empty() && "File system needs app name for reasonable defaults");
+            return path + get_filepath_app_name() + "/";
         }
         case FilePathLocation_Symbolic: {
             return "";
@@ -173,7 +174,8 @@ const string& get_default_content_path() {
         std::transform(wstring_path.begin(), wstring_path.end(), std::back_inserter(default_content_path), [] (wchar_t c) { return (char)c; });
 
         FilePath::standardize(default_content_path, true);
-        default_content_path += "spellbook/";
+        assert_else(!get_filepath_app_name().empty() && "File system needs app name for reasonable defaults");
+        default_content_path += get_filepath_app_name() + "/";
     }
     return default_content_path;
 }
@@ -264,6 +266,11 @@ vector<uint32> get_contents_uint32(const FilePath& file_name, bool binary) {
     fclose(f);
 
     return contents;
+}
+
+string& get_filepath_app_name() {
+    static string app_name;
+    return app_name;
 }
 
 }
