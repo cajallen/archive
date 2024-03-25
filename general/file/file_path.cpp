@@ -6,8 +6,8 @@
 #include <shlobj.h>
 
 #include "general/logger.hpp"
+#include "general/string.hpp"
 #include "general/file/resource.hpp"
-
 
 namespace spellbook {
 
@@ -80,8 +80,9 @@ string FilePath::root_dir() const {
         }
         case FilePathLocation_Config: {
             string path = get_appdata_local_path();
+            path.insert(path.size(), get_filepath_app_name());
             assert_else(!get_filepath_app_name().empty() && "File system needs app name for reasonable defaults");
-            return path + get_filepath_app_name() + "/";
+            return path + "/";
         }
         case FilePathLocation_Symbolic: {
             return "";
@@ -175,7 +176,8 @@ const string& get_default_content_path() {
 
         FilePath::standardize(default_content_path, true);
         assert_else(!get_filepath_app_name().empty() && "File system needs app name for reasonable defaults");
-        default_content_path += get_filepath_app_name() + "/";
+        default_content_path.insert(default_content_path.size(), get_filepath_app_name());
+        default_content_path += "/";
     }
     return default_content_path;
 }
@@ -266,11 +268,6 @@ vector<uint32> get_contents_uint32(const FilePath& file_name, bool binary) {
     fclose(f);
 
     return contents;
-}
-
-string& get_filepath_app_name() {
-    static string app_name;
-    return app_name;
 }
 
 }
