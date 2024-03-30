@@ -4,6 +4,7 @@
 #include <imgui/misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
 
+#include "extension/fmt.hpp"
 #include "extension/icons/font_awesome4.h"
 
 namespace ImGui {
@@ -177,8 +178,9 @@ bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, st
         has_width = true;
         GImGui->NextItemData.Flags &= ~ImGuiNextItemDataFlags_HasWidth;
     }
-    
-    
+
+    string s_hint = string(hint);
+    string vis_hint = string(s_hint, 0, s_hint.find_first_of("##"));
     bool changed = false;
     PushID(hint);
     BeginGroup();
@@ -188,12 +190,20 @@ bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, st
         SameLine();
         string out_string = out->rel_string();
         if (has_width) {
-            ImGui::SetNextItemWidth(desired_width);
+            ImGui::SetNextItemWidth(desired_width - 80.0f);
+        } else {
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 180.0f);
         }
-        if (InputText(hint, &out_string)) {
-            *out = FilePath(out_string);
+        string used_hint = fmt_("##{}", hint);
+        if (InputText(used_hint.c_str(), &out_string)) {
+            *out = FilePath(out_string, out->location);
             changed = true;
         }
+        SameLine();
+        ImGui::SetNextItemWidth(80.0f);
+        changed |= EnumCombo("##FileSelectType", &out->location);
+        SameLine();
+        Text("%s", vis_hint.c_str());
     }
     EndGroup();
     PathTarget(out, dnd_key);

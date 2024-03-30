@@ -42,10 +42,12 @@ concept combo_enum_concept = std::is_enum_v<J>;
 template <combo_enum_concept T>
 bool EnumCombo(const string& label, T* value, ImGuiComboFlags flags = 0) {
     bool ret = false;
-    if (BeginCombo(label.c_str(), magic_enum::enum_name(*value).data(), flags)) {
+    string preview_name = string(magic_enum::enum_name(*value).substr(magic_enum::enum_type_name<T>().size() + 1));
+    if (BeginCombo(label.c_str(), preview_name.data(), flags)) {
         for (int i = 0; i < magic_enum::enum_count<T>(); i++) {
             const bool is_selected = *value == T(i);
-            if (Selectable(magic_enum::enum_name((T) i).data(), is_selected)) {
+            string selectable_name = string(magic_enum::enum_name((T) i).substr(magic_enum::enum_type_name<T>().size() + 1));
+            if (Selectable(selectable_name.data(), is_selected)) {
                 *value = T(i);
                 ret = true;
             }

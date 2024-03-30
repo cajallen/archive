@@ -242,7 +242,7 @@ void vector<T>::clear() {
 
 template <typename T>
 void vector<T>::resize(uint32 size) {
-    internal.resize(size);
+    internal.resize(size, T{});
 }
 
 template <typename T>
