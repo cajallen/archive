@@ -1,17 +1,16 @@
 ﻿#pragma once
 
-#include "general/vector.hpp"
 #include "general/math/geometry.hpp"
 
 namespace spellbook {
 
-struct Path {
+struct NavigationPath {
     vector<v3> waypoints;
     int32 reached = INT_MAX;
 
-    Path() {}
-    Path(const vector<v3>& wps) : waypoints(wps), reached(wps.size()) {}
-    Path(vector<v3>&& wps) : waypoints(wps), reached(wps.size()) {}
+    NavigationPath() {}
+    NavigationPath(const vector<v3>& wps) : waypoints(wps), reached(wps.size()) {}
+    NavigationPath(vector<v3>&& wps) : waypoints(wps), reached(wps.size()) {}
 
     v3 get_start() const;
     v3 get_destination() const;

@@ -4,20 +4,20 @@
 
 namespace spellbook {
 
-v3 Path::get_start() const {
+v3 NavigationPath::get_start() const {
     return waypoints.back();
 }
 
-v3 Path::get_destination() const {
+v3 NavigationPath::get_destination() const {
     return waypoints.front();
 }
 
-bool Path::valid() const {
+bool NavigationPath::valid() const {
     return !waypoints.empty();
 }
 
 
-v3 Path::get_real_target(const v3& current_pos) {
+v3 NavigationPath::get_real_target(const v3& current_pos) {
     float min_dist = FLT_MAX;
     v3 min_pos;
     int32 min_waypoint_index = -1;

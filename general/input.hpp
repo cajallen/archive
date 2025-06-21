@@ -3,8 +3,6 @@
 #include <utility>
 
 #include "extension/glfw.hpp"
-#include "general/string.hpp"
-#include "general/vector.hpp"
 #include "general/umap.hpp"
 
 namespace spellbook {

@@ -2,7 +2,6 @@
 
 #include <queue>
 
-#include "general/string.hpp"
 #include "general/color.hpp"
 
 namespace spellbook {

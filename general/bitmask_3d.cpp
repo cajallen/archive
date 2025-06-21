@@ -61,7 +61,7 @@ v3i Bitmask3D::rough_max() const {
     return max_id * 4 + v3i(3);
 }
 
-bool ray_intersection(const Bitmask3D& bitmask, ray3 ray, v3& pos, v3i& open_cube, const std::function<bool(ray3, v3i, v3&)>& additional_constraints) {
+bool ray_intersection(const Bitmask3D& bitmask, ray3 ray, v3& pos, v3i& open_cube, const function<bool(ray3, v3i, v3&)>& additional_constraints) {
     v3i bound_min = bitmask.rough_min();
     v3i bound_max = bitmask.rough_max();
     

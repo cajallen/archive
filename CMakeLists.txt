@@ -2,8 +2,7 @@
 add_library(archive
     extension/glfw.cpp
     extension/imgui_extra.cpp
-    extension/vuk_extra.cpp
-    extension/vuk_imgui.cpp
+	extension/vuk_imgui.cpp
     general/math/geometry.cpp
     general/math/quaternion.cpp
     general/math/matrix.cpp

@@ -1,18 +1,16 @@
 #pragma once
 
-#include <functional>
-#include <memory>
-
-#include "general/vector.hpp"
+#include "general/umap.hpp"
+#include "general/memory.hpp"
+#include "general/function.hpp"
 #include "general/bitmask_3d.hpp"
 #include "general/navigation_path.hpp"
-#include "general/math/geometry.hpp"
 #include "general/math/math.hpp"
 
 using std::shared_ptr;
 
 namespace spellbook::astar {
-using HeuristicFunction = std::function<uint32(v3i, v3i)>;
+using HeuristicFunction = function<uint32(v3i, v3i)>;
 
 struct Node {
     uint32   G, H;
@@ -35,7 +33,7 @@ struct Navigation {
     vector<std::pair<v3i, uint32>> _get_neighbors(v3i position);
     
     // includes start/end, reverse order (target first)
-    Path find_path(v3i source, v3i target, float tolerance = 0.1f);
+    NavigationPath find_path(v3i source, v3i target, float tolerance = 0.1f);
 
     Bitmask3D* path_solids;
     Bitmask3D* off_road_solids;

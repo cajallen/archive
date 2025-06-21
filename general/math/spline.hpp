@@ -16,8 +16,7 @@ inline v3 bspline4(float t, span<const v3> points) {
         (points[0] + 4.f * points[1] + points[2]) * (1.f / 6.f);
 }
 
-inline v3 bspline(float t, const vector<v3>& points)
-{
+inline v3 bspline(float t, const vector<v3>& points) {
     if (t <= 0.0001f)
         return points.front();
     if (t >= 1.0f - 0.0001f)

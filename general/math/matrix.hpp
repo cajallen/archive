@@ -2,7 +2,6 @@
 
 #include <array>
 
-#include "general/vector.hpp"
 #include "general/file/json.hpp"
 #include "general/math/geometry.hpp"
 

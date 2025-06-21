@@ -4,6 +4,12 @@
 
 #include "json.hpp"
 
+namespace std {
+namespace filesystem {
+class path;
+}
+}
+
 namespace spellbook {
 
 enum FilePathLocation {
@@ -20,22 +26,24 @@ struct FilePath {
     FilePath(); // defaults to root dir
     explicit FilePath(string_view val, FilePathLocation location = FilePathLocation_Content);
     explicit FilePath(const string& val, FilePathLocation location = FilePathLocation_Content);
-    explicit FilePath(const fs::path& val, FilePathLocation location = FilePathLocation_Content);
+    explicit FilePath(const std::filesystem::path& val, FilePathLocation location = FilePathLocation_Content);
     explicit FilePath(const char* val, FilePathLocation location = FilePathLocation_Content);
 
     string abs_string() const;
-    fs::path abs_path() const;
+    std::filesystem::path abs_path() const;
 
     string_view rel_string_view() const;
     const string& rel_string() const;
-    fs::path rel_path() const;
+    std::filesystem::path rel_path() const;
     const char* rel_c_str() const;
 
     bool is_file() const;
+    bool is_directory() const;
+    bool exists() const;
     string filename() const;
     string extension() const;
     string stem() const;
-    fs::path parent_path() const;
+    FilePath parent_path() const;
 
     bool operator==(const FilePath& rhs) const {
         // symbolic doesn't distinguish
@@ -46,6 +54,7 @@ struct FilePath {
 
     string root_dir() const;
     void standardize();
+    void replace_extension(string_view ext);
     static void standardize(string& s, bool directory);
 };
 
@@ -70,6 +79,8 @@ string& get_content_dir_path();
 void set_content_dir_path(string_view abs_path);
 
 constexpr string_view get_filepath_app_name();
+
+void create_directories(const FilePath& file_path);
 
 }
 

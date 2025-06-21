@@ -1,11 +1,15 @@
 ﻿#include "imgui_extra.hpp"
 
+#include <filesystem>
+
 #include <imgui.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
 
 #include "extension/fmt.hpp"
 #include "extension/icons/font_awesome4.h"
+
+namespace fs = std::filesystem;
 
 namespace ImGui {
 
@@ -74,7 +78,7 @@ bool DragMat4(const string& name, spellbook::m44GPU* matrix_gpu, float speed, co
 }
 
 
-bool InspectFile(const FilePath& path, FilePath* p_selected, const std::function<void(const FilePath&)>& context_callback) {
+bool InspectFile(const FilePath& path, FilePath* p_selected, const spellbook::function<void(const FilePath&)>& context_callback) {
     bool changed = false;
     bool selected = p_selected ? *p_selected == path : false;
     if (Selectable(path.filename().c_str(), selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups, ImVec2(GetContentRegionAvail().x, GetFrameHeight()))) {
@@ -91,7 +95,7 @@ bool InspectFile(const FilePath& path, FilePath* p_selected, const std::function
     return changed;
 } 
 
-bool InspectDirectory(const FilePath& path, FilePath* p_selected, const std::function<bool(const FilePath&)>& filter, int open_subdirectories, const std::function<void(const FilePath&)>& context_callback) {
+bool InspectDirectory(const FilePath& path, FilePath* p_selected, const spellbook::function<bool(const FilePath&)>& filter, int open_subdirectories, const spellbook::function<void(const FilePath&)>& context_callback) {
     bool changed = false;
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
     if (p_selected && path == *p_selected)
@@ -166,9 +170,9 @@ void PathTarget(FilePath* out, const char* dnd_key) {
     }
 }
 
-bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, std::function<bool(const FilePath&)> path_filter, const char* dnd_key, int open_subdirectories, const std::function<void(const FilePath&)>& context_callback) {
-    if (!fs::exists(base_folder.abs_path()))
-        fs::create_directories(base_folder.abs_path());
+bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, spellbook::function<bool(const FilePath&)> path_filter, const char* dnd_key, int open_subdirectories, const spellbook::function<void(const FilePath&)>& context_callback) {
+    if (!base_folder.exists())
+        create_directories(base_folder);
 
     bool has_width = false;
     float desired_width = 0.0f;
@@ -224,7 +228,7 @@ bool PathSelect(const char* hint, FilePath* out, const FilePath& base_folder, st
     return changed;
 }
 
-bool PathSelectBody(FilePath* out, const FilePath& base_folder, const std::function<bool(const FilePath&)>& filter, bool* close_popup, int open_subdirectories, const std::function<void(const FilePath&)>& context_callback) {
+bool PathSelectBody(FilePath* out, const FilePath& base_folder, const spellbook::function<bool(const FilePath&)>& filter, bool* close_popup, int open_subdirectories, const spellbook::function<void(const FilePath&)>& context_callback) {
     spellbook::v2 size = close_popup == nullptr ?
         spellbook::v2(GetContentRegionAvail()) :
         spellbook::v2(GetContentRegionAvail()) - spellbook::v2(0, GetFrameHeightWithSpacing());

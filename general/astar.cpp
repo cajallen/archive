@@ -1,10 +1,7 @@
 #include "astar.hpp"
 
-#include <algorithm>
-
 #include "extension/fmt.hpp"
 #include "extension/fmt_geometry.hpp"
-#include "general/math/math.hpp"
 
 namespace spellbook {
 
@@ -20,7 +17,7 @@ uint32 astar::Node::get_score() const {
     return G + H;
 }
 
-Path astar::Navigation::find_path(v3i source, v3i target, float tolerance) {
+NavigationPath astar::Navigation::find_path(v3i source, v3i target, float tolerance) {
     shared_ptr<Node>         current = nullptr;
     vector<shared_ptr<Node>> open_set, closed_set;
     open_set.reserve(100);
@@ -109,7 +106,7 @@ Path astar::Navigation::find_path(v3i source, v3i target, float tolerance) {
     }
     path.push_back(raw_path.back());
     
-    return Path(std::move(path));
+    return NavigationPath(std::move(path));
 }
 
 shared_ptr<astar::Node> astar::Navigation::_find_node_on_list(vector<shared_ptr<Node>>& nodes_, v3i position) {

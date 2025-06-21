@@ -13,6 +13,8 @@ using std::ofstream;
 using std::ostringstream;
 using std::to_string;
 
+namespace fs = std::filesystem;
+
 namespace spellbook {
 
 json_value to_jv(vector<json_value> _vector) {
@@ -189,7 +191,7 @@ string parse_quote(istream& iss) {
 }
 
 void file_dump(const json& json, const string& file_name) {
-    create_directories(fs::path(file_name).parent_path());
+    fs::create_directories(fs::path(file_name).parent_path());
     ofstream ofs(file_name);
     ofs << dump_json(json);
 }

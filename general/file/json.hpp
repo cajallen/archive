@@ -5,8 +5,6 @@
 #include <type_traits>
 #include <magic_enum.hpp>
 
-#include "general/vector.hpp"
-#include "general/string.hpp"
 #include "general/umap.hpp"
 
 using std::get;
@@ -312,7 +310,20 @@ T from_jv_impl(const json_value& jv, T* _) {
 
 template <enum_concept T>
 T from_jv_impl(const json_value& jv, T* _) {
-    return magic_enum::enum_cast<T>(get<string>(jv.value)).value_or(T(0));
+    T t;
+    visit(overloaded{
+        [&](const string& s) {
+            t = magic_enum::enum_cast<T>(get<string>(jv.value)).value_or(T(0));
+        },
+        [&](const int64& i) {
+            t = T(i);
+        },
+        [](auto a) {
+        }
+    },
+    jv.value);
+
+    return t;
 }
 
 }

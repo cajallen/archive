@@ -8,22 +8,28 @@
 #include "general/math/quaternion.hpp"
 #include "general/math/matrix.hpp"
 
-template <> struct fmt::formatter<spellbook::v2> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::v2& vec, FormatContext& ctx) {
+template <>
+struct fmt::formatter<spellbook::v2> {
+    fmt::formatter<float> float_formatter;
+
+    constexpr auto parse(fmt::format_parse_context& ctx) {
+        return float_formatter.parse(ctx);
+    }
+
+    template <typename FormatContext>
+    auto format(const spellbook::v2& vec, FormatContext& ctx) const {
         auto out = ctx.out();
-        *out     = '(';
-        ctx.advance_to(out);
-        out = formatter<float>::format(vec.x, ctx);
+        out = fmt::format_to(out, "(");
+        out = float_formatter.format(vec.x, ctx);
         out = fmt::format_to(out, ", ");
-        ctx.advance_to(out);
-        out  = formatter<float>::format(vec.y, ctx);
-        *out = ')';
+        out = float_formatter.format(vec.y, ctx);
+        out = fmt::format_to(out, ")");
         return out;
     }
 };
 
 template <> struct fmt::formatter<spellbook::v2i> : formatter<int32> {
-    template <typename FormatContext> auto format(const spellbook::v2i& vec, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::v2i& vec, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         ctx.advance_to(out);
@@ -37,22 +43,29 @@ template <> struct fmt::formatter<spellbook::v2i> : formatter<int32> {
 };
 
 template <> struct fmt::formatter<spellbook::euler> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::euler& eul, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::euler& eul, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
+
         out      = fmt::format_to(out, "yaw:");
         ctx.advance_to(out);
         out = formatter<float>::format(eul.yaw, ctx);
+
         out = fmt::format_to(out, ", pitch:");
         ctx.advance_to(out);
         out  = formatter<float>::format(eul.pitch, ctx);
+
+        out = fmt::format_to(out, ", roll:");
+        ctx.advance_to(out);
+        out  = formatter<float>::format(eul.roll, ctx);
+
         *out = ')';
         return out;
     }
 };
 
 template <> struct fmt::formatter<spellbook::v3> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::v3& vec, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::v3& vec, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         ctx.advance_to(out);
@@ -69,7 +82,7 @@ template <> struct fmt::formatter<spellbook::v3> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::v3i> : formatter<int32> {
-    template <typename FormatContext> auto format(const spellbook::v3i& vec, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::v3i& vec, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         ctx.advance_to(out);
@@ -86,7 +99,7 @@ template <> struct fmt::formatter<spellbook::v3i> : formatter<int32> {
 };
 
 template <> struct fmt::formatter<spellbook::v4> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::v4& vec, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::v4& vec, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         ctx.advance_to(out);
@@ -106,7 +119,7 @@ template <> struct fmt::formatter<spellbook::v4> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::line2> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::line2& line, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::line2& line, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         out      = fmt::format_to(out, "start:");
@@ -121,7 +134,7 @@ template <> struct fmt::formatter<spellbook::line2> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::ray3> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::ray3& ray, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::ray3& ray, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         out      = fmt::format_to(out, "origin:");
@@ -136,7 +149,7 @@ template <> struct fmt::formatter<spellbook::ray3> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::quat> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::quat& q, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::quat& q, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         ctx.advance_to(out);
@@ -156,7 +169,7 @@ template <> struct fmt::formatter<spellbook::quat> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::m33> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::m33& m, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::m33& m, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '[';
         for (int y = 0; y < 3; y++) {
@@ -177,7 +190,7 @@ template <> struct fmt::formatter<spellbook::m33> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::m44> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::m44& m, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::m44& m, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '[';
         for (int y = 0; y < 4; y++) {
@@ -202,7 +215,7 @@ template <> struct fmt::formatter<spellbook::m44> : formatter<float> {
 };
 
 template <> struct fmt::formatter<spellbook::Color> : formatter<float> {
-    template <typename FormatContext> auto format(const spellbook::Color& col, FormatContext& ctx) {
+    template <typename FormatContext> auto format(const spellbook::Color& col, FormatContext& ctx) const {
         auto out = ctx.out();
         *out     = '(';
         ctx.advance_to(out);

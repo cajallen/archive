@@ -1,11 +1,8 @@
 #pragma once
 
 #include <array>
-#include <filesystem>
 
 #include "general/file/json.hpp"
-#include "general/vector.hpp"
-#include "general/string.hpp"
 #include "general/file/file_path.hpp"
 
 using std::array;

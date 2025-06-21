@@ -1,5 +1,6 @@
 ﻿#include "file_path.hpp"
 
+#include <filesystem>
 #include <magic_enum.hpp>
 #include <windows.h>
 #include <knownfolders.h>
@@ -8,6 +9,8 @@
 #include "general/logger.hpp"
 #include "general/string.hpp"
 #include "general/file/resource.hpp"
+
+namespace fs = std::filesystem;
 
 namespace spellbook {
 
@@ -51,6 +54,16 @@ bool FilePath::is_file() const {
     return value.find_first_of('.') != string::npos;
 }
 
+bool FilePath::is_directory() const {
+    return !is_file();
+}
+
+bool FilePath::exists() const {
+    if (location == FilePathLocation_Symbolic)
+        return true;
+    return fs::exists(abs_path());
+}
+
 string FilePath::filename() const {
     return rel_path().filename().string();
 }
@@ -61,8 +74,8 @@ string FilePath::stem() const {
     return rel_path().stem().string();
 }
 
-fs::path FilePath::parent_path() const {
-    return this->abs_path().parent_path();
+FilePath FilePath::parent_path() const {
+    return FilePath(this->abs_path().parent_path(), location);
 }
 
 FilePath FilePath::operator + (string_view rhs) const {
@@ -92,6 +105,22 @@ string FilePath::root_dir() const {
             return path;
         }
         default: assert_else(false) return "";
+    }
+}
+
+void FilePath::replace_extension(string_view new_ext) {
+    std::size_t last_dot = value.find_last_of('.');
+    std::size_t last_slash = value.find_last_of("/\\");
+        
+    if (last_dot != string::npos && (last_slash == string::npos || last_dot > last_slash)) {
+        value.erase(last_dot);
+    }
+
+    if (!new_ext.empty()) {
+        if (new_ext.front() != '.') {
+            value += '.';
+        }
+        value.append(new_ext);
     }
 }
 
@@ -268,6 +297,10 @@ vector<uint32> get_contents_uint32(const FilePath& file_name, bool binary) {
     fclose(f);
 
     return contents;
+}
+
+void create_directories(const FilePath& file_path) {
+    fs::create_directories(file_path.abs_path());
 }
 
 }

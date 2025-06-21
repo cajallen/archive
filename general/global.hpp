@@ -1,8 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <filesystem>
-#include <functional>
 
 using int8  = int8_t;
 using int16 = int16_t;
@@ -15,5 +13,3 @@ using uint64 = uint64_t;
 
 #include "vector.hpp"
 #include "string.hpp"
-
-namespace fs = std::filesystem;
